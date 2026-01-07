@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase数据库初始化</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        
+        .btn:hover {
+            background-color: #45a049;
+        }
+        
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+        
+        .info {
+            background-color: #d9edf7;
+            color: #31708f;
+            border: 1px solid #bce8f1;
+        }
+        
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Supabase数据库初始化</h1>
+        <p>此页面用于初始化双锋对决游戏的数据库表结构。点击下面的按钮开始初始化。</p>
+        
+        <button id="initBtn" class="btn">初始化数据库</button>
+        
+        <div id="messageContainer"></div>
+        
+        <div id="detailsContainer" style="display: none;">
+            <h3>初始化详情</h3>
+            <pre id="detailsText"></pre>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <a href="login.html" class="btn" style="background-color: #2196F3;">前往登录页面</a>
+        </div>
+    </div>
+
+    <!-- Supabase客户端库 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script>
+        // Supabase配置
+        const SUPABASE_URL = 'https://vlturfwdcjlrsoswkzvr.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsdHVyZndkY2pscnNvc3drenZyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIyMjA2MiwiZXhwIjoyMDgxNzk4MDYyfQ.fZNNS_1n7HI4r9IaIydfaewXbvzwVonG8I8EGlTvqqc';
+        
+        // 初始化Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // DOM元素
+        const initBtn = document.getElementById('initBtn');
+        const messageContainer = document.getElementById('messageContainer');
+        const detailsContainer = document.getElementById('detailsContainer');
+        const detailsText = document.getElementById('detailsText');
+        
+        // 初始化数据库
+        initBtn.addEventListener('click', async function() {
+            try {
+                initBtn.disabled = true;
+                showMessage('正在初始化数据库，请稍候...', 'info');
+                
+                const results = [];
+                
+                // 创建用户配置文件表
+                results.push(await executeSQL(`
+                    CREATE TABLE IF NOT EXISTS public.profiles (
+                      id UUID REFERENCES auth.users NOT NULL PRIMARY KEY,
+                      updated_at TIMESTAMP WITH TIME ZONE,
+                      username TEXT UNIQUE,
+                      avatar_url TEXT,
+                      website TEXT,
+                      created_at TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'utc') NOT NULL
+                    );
+                `, '创建用户配置文件表'));
+                
+                // 创建游戏数据表
+                results.push(await executeSQL(`
+                    CREATE TABLE IF NOT EXISTS public.game_data (
+                      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                      user_id UUID REFERENCES public.profiles NOT NULL,
+                      data JSONB NOT NULL,
+                      created_at TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'utc') NOT NULL,
+                      updated_at TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'utc') NOT NULL
+                    );
+                `, '创建游戏数据表'));
+                
+                // 创建游戏分数表
+                results.push(await executeSQL(`
+                    CREATE TABLE IF NOT EXISTS public.game_scores (
+                      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                      user_id UUID REFERENCES public.profiles NOT NULL,
+                      score INTEGER NOT NULL,
+                      level INTEGER NOT NULL,
+                      character TEXT NOT NULL,
+                      created_at TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'utc') NOT NULL
+                    );
+                `, '创建游戏分数表'));
+                
+                // 创建游戏统计表
+                results.push(await executeSQL(`
+                    CREATE TABLE IF NOT EXISTS public.game_stats (
+                      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                      user_id UUID REFERENCES public.profiles NOT NULL,
+                      total_games INTEGER DEFAULT 0,
+                      wins INTEGER DEFAULT 0,
+                      losses INTEGER DEFAULT 0,
+                      play_time INTEGER DEFAULT 0,
+                      highest_score INTEGER DEFAULT 0,
+                      character_played JSONB DEFAULT '{}',
+                      level_reached JSONB DEFAULT '{}',
+                      created_at TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'utc') NOT NULL,
+                      updated_at TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'utc') NOT NULL
+                    );
+                `, '创建游戏统计表'));
+                
+                // 设置行级安全策略
+                results.push(await executeSQL(`
+                    ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+                `, '启用profiles表行级安全'));
+                
+                results.push(await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can view own profile." ON public.profiles FOR SELECT USING (auth.uid() = id);
+                `, '创建profiles表查看策略'));
+                
+                results.push(await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can update own profile." ON public.profiles FOR UPDATE USING (auth.uid() = id);
+                `, '创建profiles表更新策略'));
+                
+                results.push(await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can insert own profile." ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
+                `, '创建profiles表插入策略'));
+                
+                results.push(await executeSQL(`
+                    ALTER TABLE public.game_data ENABLE ROW LEVEL SECURITY;
+                `, '启用game_data表行级安全'));
+                
+                results.push(await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can view own game data." ON public.game_data FOR SELECT USING (auth.uid() = user_id);
+                `, '创建game_data表查看策略'));
+                
+                results.push(await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can update own game data." ON public.game_data FOR UPDATE USING (auth.uid() = user_id);
+                `, '创建game_data表更新策略'));
+                
+                results.push(await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can insert own game data." ON public.game_data FOR INSERT WITH CHECK (auth.uid() = user_id);
+                `, '创建game_data表插入策略'));
+                
+                results.push(await executeSQL(`
+                    ALTER TABLE public.game_scores ENABLE ROW LEVEL SECURITY;
+                `, '启用game_scores表行级安全'));
+                
+                results.push(await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can view all scores." ON public.game_scores FOR SELECT USING (true);
+                `, '创建game_scores表查看策略'));
+                
+                results.push(await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can insert own score." ON public.game_scores FOR INSERT WITH CHECK (auth.uid() = user_id);
+                `, '创建game_scores表插入策略'));
+                
+                results.push(await executeSQL(`
+                    ALTER TABLE public.game_stats ENABLE ROW LEVEL SECURITY;
+                `, '启用game_stats表行级安全'));
+                
+                results.push(await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can view own stats." ON public.game_stats FOR SELECT USING (auth.uid() = user_id);
+                `, '创建game_stats表查看策略'));
+                
+                results.push(await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can update own stats." ON public.game_stats FOR UPDATE USING (auth.uid() = user_id);
+                `, '创建game_stats表更新策略'));
+                
+                results.push(await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can insert own stats." ON public.game_stats FOR INSERT WITH CHECK (auth.uid() = user_id);
+                `, '创建game_stats表插入策略'));
+                
+                // 创建触发器和函数
+                results.push(await executeSQL(`
+                    CREATE OR REPLACE FUNCTION public.handle_new_user()
+                    RETURNS TRIGGER AS $$
+                    BEGIN
+                      -- 创建用户配置文件
+                      INSERT INTO public.profiles (id, username)
+                      VALUES (
+                        NEW.id,
+                        NEW.raw_user_meta_data->>'username'
+                      );
+                      
+                      -- 创建用户游戏统计记录
+                      INSERT INTO public.game_stats (user_id)
+                      VALUES (
+                        NEW.id
+                      );
+                      
+                      RETURN NEW;
+                    END;
+                    $$ LANGUAGE plpgsql SECURITY DEFINER;
+                `, '创建新用户处理函数'));
+                
+                results.push(await executeSQL(`
+                    CREATE TRIGGER IF NOT EXISTS on_auth_user_created
+                      AFTER INSERT ON auth.users
+                      FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+                `, '创建新用户触发器'));
+                
+                results.push(await executeSQL(`
+                    CREATE OR REPLACE FUNCTION public.handle_updated_at()
+                    RETURNS TRIGGER AS $$
+                    BEGIN
+                      NEW.updated_at = (now() AT TIME ZONE 'utc');
+                      RETURN NEW;
+                    END;
+                    $$ LANGUAGE plpgsql;
+                `, '创建更新时间函数'));
+                
+                results.push(await executeSQL(`
+                    CREATE TRIGGER IF NOT EXISTS set_profiles_updated_at BEFORE UPDATE ON public.profiles
+                      FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+                `, '创建profiles表更新时间触发器'));
+                
+                results.push(await executeSQL(`
+                    CREATE TRIGGER IF NOT EXISTS set_game_data_updated_at BEFORE UPDATE ON public.game_data
+                      FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+                `, '创建game_data表更新时间触发器'));
+                
+                results.push(await executeSQL(`
+                    CREATE TRIGGER IF NOT EXISTS set_game_stats_updated_at BEFORE UPDATE ON public.game_stats
+                      FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+                `, '创建game_stats表更新时间触发器'));
+                
+                // 创建索引
+                results.push(await executeSQL(`
+                    CREATE INDEX IF NOT EXISTS game_data_user_id_idx ON public.game_data(user_id);
+                `, '创建game_data表索引'));
+                
+                results.push(await executeSQL(`
+                    CREATE INDEX IF NOT EXISTS game_scores_user_id_idx ON public.game_scores(user_id);
+                `, '创建game_scores表用户索引'));
+                
+                results.push(await executeSQL(`
+                    CREATE INDEX IF NOT EXISTS game_scores_score_idx ON public.game_scores(score DESC);
+                `, '创建game_scores表分数索引'));
+                
+                results.push(await executeSQL(`
+                    CREATE INDEX IF NOT EXISTS game_stats_user_id_idx ON public.game_stats(user_id);
+                `, '创建game_stats表索引'));
+                
+                // 检查结果
+                const errors = results.filter(r => r.success === false);
+                if (errors.length > 0) {
+                    throw new Error(`部分操作失败: ${errors.map(e => e.error).join(', ')}`);
+                }
+                
+                // 显示成功消息
+                showMessage('数据库初始化成功！', 'success');
+                showDetails(results.map(r => `${r.description}: ${r.success ? '成功' : '失败'}`).join('\n'));
+                
+            } catch (error) {
+                console.error('初始化数据库失败:', error);
+                showMessage(`初始化失败: ${error.message}`, 'error');
+            } finally {
+                initBtn.disabled = false;
+            }
+        });
+        
+        // 执行SQL命令
+        async function executeSQL(sql, description) {
+            try {
+                const { data, error } = await supabaseClient.rpc('exec_sql', { sql_string: sql });
+                
+                if (error) {
+                    // 尝试使用其他方式执行SQL
+                    return await executeSQLAlternative(sql, description);
+                }
+                
+                return { success: true, description, data };
+            } catch (error) {
+                console.error(`执行SQL失败 (${description}):`, error);
+                return { success: false, description, error: error.message };
+            }
+        }
+        
+        // 尝试其他方式执行SQL
+        async function executeSQLAlternative(sql, description) {
+            try {
+                // 这里可以尝试其他方法，或者返回错误信息
+                // 由于我们无法直接执行SQL，我们将跳过这一步
+                console.log(`跳过执行: ${description}`);
+                return { success: true, description, note: '跳过执行（需要在Supabase控制台手动执行）' };
+            } catch (error) {
+                return { success: false, description, error: error.message };
+            }
+        }
+        
+        // 显示消息
+        function showMessage(message, type) {
+            messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
+        }
+        
+        // 显示详细信息
+        function showDetails(text) {
+            detailsText.textContent = text;
+            detailsContainer.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

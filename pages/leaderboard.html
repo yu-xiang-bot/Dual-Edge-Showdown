@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双锋对决 - 排行榜</title>
+    <link rel = "icon" href = "../favicon.ico" type = "image/x-icon" />
+    <link rel="stylesheet" href="../styles/new.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-image: url('../assets/images/boardBack.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            color: #fff;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(15, 15, 25, 0.4), rgba(30, 30, 40, 0.3));
+            z-index: -1;
+        }
+        
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+            background: linear-gradient(120deg, #ffffff, #e0e0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+            font-weight: 300;
+            letter-spacing: 1px;
+            padding: 0.5rem 0;
+            position: relative;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.7), rgba(255,255,255,0));
+            border-radius: 2px;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            margin: 0.8rem 0 0;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 300;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .leaderboard-container {
+            background: linear-gradient(135deg, rgba(30, 30, 40, 0.4), rgba(20, 20, 30, 0.5));
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .leaderboard-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        }
+        
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding: 0 0 1.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-value {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.3rem;
+        }
+        
+        .stat-label {
+            display: block;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 1.2rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .leaderboard-table th {
+            font-weight: 600;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.2);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 1.2rem 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .leaderboard-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .leaderboard-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .leaderboard-table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            transform: scale(1.01);
+        }
+        
+        .rank {
+            font-weight: 600;
+            text-align: center;
+            width: 80px;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            vertical-align: middle;
+        }
+        
+        /* 前三名特殊样式 - 简化版本 */
+        .rank-1 {
+            color: #FFD700;
+            font-size: 1.4rem;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .rank-2 {
+            color: #C0C0C0;
+            font-size: 1.3rem;
+            text-shadow: 0 0 12px rgba(192, 192, 192, 0.5), 0 0 25px rgba(192, 192, 192, 0.3);
+        }
+
+        .rank-3 {
+            color: #CD7F32;
+            font-size: 1.25rem;
+            text-shadow: 0 0 12px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.3);
+        }
+        
+        /* 前三名行的背景 */
+        .leaderboard-table tr:nth-child(1) {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.08), transparent);
+        }
+
+        .leaderboard-table tr:nth-child(2) {
+            background: linear-gradient(90deg, rgba(192, 192, 192, 0.06), transparent);
+        }
+
+        .leaderboard-table tr:nth-child(3) {
+            background: linear-gradient(90deg, rgba(205, 127, 50, 0.06), transparent);
+        }
+
+        .username {
+            font-weight: 500;
+            font-size: 1.1rem;
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .leaderboard-table tbody tr:hover .username {
+            color: #e0e0ff;
+            transform: translateX(5px);
+        }
+
+        .level {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 1.1rem;
+            text-align: center;
+            color: #ffd700;
+            font-weight: 500;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+        }
+
+        .playtime {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 1.1rem;
+            text-align: right;
+            color: #8cff8c;
+            font-weight: 500;
+            text-shadow: 0 0 8px rgba(140, 255, 140, 0.3);
+        }
+
+        .leaderboard-table tbody tr:hover .playtime {
+            color: #a0ffa0;
+            text-shadow: 0 0 12px rgba(160, 255, 160, 0.5);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        /* 添加行动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #ff9999;
+            background-color: rgba(255, 0, 0, 0.1);
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-size: 1rem;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
+            font-style: italic;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .stats-header {
+                flex-direction: column;
+                gap: 1rem;
+                padding-bottom: 1rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 0.8rem 0.5rem;
+            }
+            
+            .username {
+                font-size: 1rem;
+            }
+
+            .level {
+                font-size: 0.9rem;
+            }
+
+            .playtime {
+                font-size: 0.9rem;
+            }
+            
+            .rank {
+                width: 60px;
+                font-size: 1rem;
+            }
+            
+            .rank-1 {
+                font-size: 1.2rem;
+            }
+            
+            .rank-2 {
+                font-size: 1.15rem;
+            }
+            
+            .rank-3 {
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .leaderboard-container {
+                padding: 1.2rem;
+            }
+            
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 0.6rem 0.4rem;
+                font-size: 0.9rem;
+            }
+            
+            .username {
+                font-size: 0.9rem;
+            }
+
+            .level {
+                font-size: 0.8rem;
+            }
+
+            .playtime {
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* 音量控制样式 - 与游戏页面一致 */
+        .volume-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(30, 30, 40, 0.85), rgba(20, 20, 30, 0.9));
+            border-radius: 30px;
+            padding: 8px 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .volume-control:hover {
+            background: linear-gradient(135deg, rgba(40, 40, 50, 0.95), rgba(30, 30, 40, 0.95));
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .volume-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-icon:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: scale(1.1);
+        }
+
+        .volume-icon:active {
+            transform: scale(0.95);
+        }
+
+        .volume-slider-container {
+            display: flex;
+            align-items: center;
+            margin-left: 12px;
+            opacity: 0;
+            max-width: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .volume-control:hover .volume-slider-container {
+            opacity: 1;
+            max-width: 180px;
+            margin-left: 12px;
+        }
+
+        .volume-slider {
+            width: 120px;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #ff5252 0%, #ff5252 30%, #ffeb3b 30%, #ffeb3b 70%, #4caf50 70%, #4caf50 100%);
+            outline: none;
+            border-radius: 3px;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider:hover::-webkit-slider-thumb {
+            transform: scale(1.2);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider:hover::-moz-range-thumb {
+            transform: scale(1.2);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-value {
+            margin-left: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            min-width: 40px;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 添加音量预设按钮 */
+        .volume-presets {
+            display: flex;
+            margin-left: 10px;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .volume-control:hover .volume-presets {
+            opacity: 1;
+        }
+
+        .volume-preset-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .volume-preset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .volume-preset-btn:active {
+            transform: scale(0.95);
+        }
+
+        .volume-preset-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.15);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* 为静音状态添加特殊样式 */
+        .volume-control.muted .volume-icon {
+            color: #ff5252;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .volume-control {
+                top: 15px;
+                right: 15px;
+                padding: 6px 12px;
+            }
+
+            .volume-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 18px;
+            }
+
+            .volume-slider {
+                width: 90px;
+            }
+
+            .volume-value {
+                font-size: 12px;
+                min-width: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景音乐 -->
+    <audio id="bgMusic" loop>
+        <source src="../assets/sounds/effects/mainMusic.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- 音量控制 -->
+    <div class="volume-control" id="volumeControl">
+        <div class="volume-icon" id="volumeIcon">🔊</div>
+        <div class="volume-slider-container" id="volumeSliderContainer">
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+            <div class="volume-value" id="volumeValue">70%</div>
+            <div class="volume-presets">
+                <button class="volume-preset-btn" data-volume="0">0</button>
+                <button class="volume-preset-btn" data-volume="25">25</button>
+                <button class="volume-preset-btn" data-volume="50">50</button>
+                <button class="volume-preset-btn" data-volume="75">75</button>
+                <button class="volume-preset-btn" data-volume="100">100</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>双锋对决 - 排行榜</h1>
+            <p>按玩家在线时长排名</p>
+        </header>
+        
+        <div class="nav-buttons">
+            <button id="backToGameBtn" class="btn">返回游戏</button>
+            <button id="refreshBtn" class="btn">刷新数据</button>
+        </div>
+        
+        <div class="leaderboard-container">
+            <div class="stats-header">
+                <div class="stat-item">
+                    <span class="stat-value" id="totalPlayers">--</span>
+                    <span class="stat-label">总玩家数</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="totalPlaytime">--</span>
+                    <span class="stat-label">平均在线时长</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="lastUpdate">--</span>
+                    <span class="stat-label">最后更新</span>
+                </div>
+            </div>
+            <div id="playtimeLeaderboard">
+                <div class="loading">正在加载在线时长排行榜...</div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2023 双锋对决. 使用Supabase数据库提供支持.</p>
+    </footer>
+
+        <!-- Supabase客户端库 -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+        <script src="../scripts/supabase.js"></script>
+        <script src="../scripts/playtime-tracker.js"></script>
+        <script>
+        
+        // DOM元素
+        const backToGameBtn = document.getElementById('backToGameBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const leaderboardContainer = document.getElementById('playtimeLeaderboard');
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载在线时长排行榜数据
+            loadPlaytimeLeaderboard();
+
+            // 刷新按钮事件
+            refreshBtn.addEventListener('click', loadPlaytimeLeaderboard);
+
+            // 返回按钮事件 - 统一返回到游戏主菜单
+            backToGameBtn.addEventListener('click', function() {
+                console.log('排行榜页面返回按钮被点击，返回到游戏主菜单');
+                window.location.href = './game.html';
+            });
+        });
+        
+        // 格式化在线时长（秒）为小时:分钟:秒格式
+        function formatPlaytime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // 加载在线时长排行榜
+        async function loadPlaytimeLeaderboard() {
+            showLoading();
+
+            try {
+                // 等待Supabase初始化完成
+                if (window.userDataManagerReady) {
+                    await window.userDataManagerReady;
+                }
+
+                // 从game_stats表和profiles表联合查询,按游戏总时长排序
+                const { data, error } = await supabaseClient
+                    .from('game_stats')
+                    .select(`
+                        play_time,
+                        level,
+                        profiles (
+                            username
+                        )
+                    `)
+                    .order('play_time', { ascending: false })
+                    .limit(20);
+
+                if (error) {
+                    console.error('加载排行榜失败:', error.message);
+                    renderPlaytimeLeaderboard(getMockData());
+                    return;
+                }
+
+                // 如果没有数据，使用模拟数据
+                if (!data || data.length === 0) {
+                    renderPlaytimeLeaderboard(getMockData());
+                    return;
+                }
+
+                // 转换数据格式
+                const players = data.map(item => ({
+                    username: item.profiles?.username || '未知玩家',
+                    playtime: item.play_time || 0,
+                    level: item.level || 1
+                }));
+
+                renderPlaytimeLeaderboard(players);
+            } catch (error) {
+                console.error('加载排行榜失败:', error.message);
+                renderPlaytimeLeaderboard(getMockData());
+            }
+        }
+        
+        // 渲染在线时长排行榜
+        function renderPlaytimeLeaderboard(players) {
+            if (!players || players.length === 0) {
+                leaderboardContainer.innerHTML = '<div class="empty-state">暂无记录</div>';
+                return;
+            }
+
+            // 计算统计数据
+            updateStats(players);
+
+            let html = `
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>排名</th>
+                            <th>玩家昵称</th>
+                            <th>等级</th>
+                            <th>在线时长</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            players.forEach((player, index) => {
+                const rankClass = index < 3 ? `rank-${index + 1}` : '';
+                const username = player.username || '未知玩家';
+                const level = player.level || 1;
+                const playtime = formatPlaytime(player.playtime || 0);
+                const animationDelay = index * 0.05;
+
+                html += `
+                    <tr style="animation: fadeInUp 0.4s ease-out ${animationDelay}s both;">
+                        <td class="rank ${rankClass}">${index + 1}</td>
+                        <td class="username">${username}</td>
+                        <td class="level">Lv.${level}</td>
+                        <td class="playtime">${playtime}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            leaderboardContainer.innerHTML = html;
+        }
+        
+        // 更新统计数据
+        function updateStats(players) {
+            // 更新总玩家数
+            document.getElementById('totalPlayers').textContent = players.length;
+            
+            // 计算平均在线时长
+            if (players.length > 0) {
+                const totalSeconds = players.reduce((sum, player) => sum + (player.playtime || 0), 0);
+                const avgSeconds = Math.floor(totalSeconds / players.length);
+                document.getElementById('totalPlaytime').textContent = formatPlaytime(avgSeconds);
+            } else {
+                document.getElementById('totalPlaytime').textContent = '00:00:00';
+            }
+            
+            // 更新最后更新时间
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('lastUpdate').textContent = `${hours}:${minutes}`;
+        }
+        
+        // 生成模拟数据
+        function getMockData() {
+            const mockPlayers = [];
+            const names = ['玩家1', '玩家2', '玩家3', '玩家4', '玩家5', '玩家6', '玩家7', '玩家8', '玩家9', '玩家10'];
+            
+            for (let i = 0; i < 10; i++) {
+                mockPlayers.push({
+                    username: names[i] || `玩家${i + 1}`,
+                    playtime: Math.floor(Math.random() * 36000) + 3600 // 1-11小时
+                });
+            }
+            
+            // 按在线时长排序
+            return mockPlayers.sort((a, b) => b.playtime - a.playtime);
+        }
+        
+        // 显示加载中
+        function showLoading() {
+            leaderboardContainer.innerHTML = '<div class="loading">正在加载在线时长排行榜...</div>';
+        }
+        
+        // 背景音乐控制
+        document.addEventListener('DOMContentLoaded', function() {
+            const bgMusic = document.getElementById('bgMusic');
+            const volumeIcon = document.getElementById('volumeIcon');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeValue = document.getElementById('volumeValue');
+            const volumeControl = document.getElementById('volumeControl');
+            const volumePresets = document.querySelectorAll('.volume-preset-btn');
+            
+            // 从localStorage读取音量状态，如果没有则使用默认值70%
+            let currentVolume = parseInt(localStorage.getItem('bgmVolume')) || 70;
+            let savedVolume = parseInt(localStorage.getItem('bgmSavedVolume')) || 70;
+            let isMusicPlaying = false;
+            
+            // 设置初始音量和UI
+            bgMusic.volume = currentVolume / 100;
+            volumeSlider.value = currentVolume;
+            volumeValue.textContent = currentVolume + "%";
+            updateVolumeIcon();
+            updateSliderBackground();
+            
+            // 检查并保存音频状态到localStorage
+            function saveAudioState() {
+                localStorage.setItem('bgmVolume', currentVolume);
+                localStorage.setItem('bgmSavedVolume', savedVolume);
+                localStorage.setItem('bgmIsPlaying', !bgMusic.paused);
+                if (!bgMusic.paused) {
+                    localStorage.setItem('bgmCurrentTime', bgMusic.currentTime);
+                }
+            }
+            
+            // 从localStorage恢复音频状态
+            function restoreAudioState() {
+                const savedIsPlaying = localStorage.getItem('bgmIsPlaying');
+                const savedCurrentTime = localStorage.getItem('bgmCurrentTime');
+                
+                if (savedIsPlaying === 'true' && savedCurrentTime) {
+                    bgMusic.currentTime = parseFloat(savedCurrentTime);
+                    bgMusic.play().then(() => {
+                        isMusicPlaying = true;
+                        console.log('背景音乐从上次位置继续播放');
+                    }).catch(error => {
+                        console.log('背景音乐播放失败:', error);
+                    });
+                }
+            }
+            
+            // 页面卸载时保存状态
+            window.addEventListener('beforeunload', saveAudioState);
+            
+            // 页面加载时恢复状态
+            restoreAudioState();
+            
+            // 点击页面任意位置开始播放音乐（解决浏览器自动播放限制）
+            document.addEventListener('click', function initMusic() {
+                if (!isMusicPlaying) {
+                    bgMusic.play().then(() => {
+                        isMusicPlaying = true;
+                        console.log('背景音乐开始播放');
+                    }).catch(error => {
+                        console.log('背景音乐播放失败:', error);
+                    });
+                    
+                    // 移除事件监听器
+                    document.removeEventListener('click', initMusic);
+                }
+            }, { once: true });
+            
+            // 音量图标点击事件
+            volumeIcon.addEventListener('click', function() {
+                if (currentVolume > 0) {
+                    // 保存当前音量并静音
+                    savedVolume = currentVolume;
+                    currentVolume = 0;
+                    volumeSlider.value = 0;
+                    volumeValue.textContent = "0%";
+                    updateVolumeIcon("🔇");
+                    volumeControl.classList.add("muted");
+                } else {
+                    // 恢复之前的音量
+                    currentVolume = savedVolume || 70;
+                    volumeSlider.value = currentVolume;
+                    volumeValue.textContent = currentVolume + "%";
+                    updateVolumeIcon();
+                    volumeControl.classList.remove("muted");
+                }
+                bgMusic.volume = currentVolume / 100;
+                saveAudioState();
+            });
+            
+            // 音量滑块变化事件
+            volumeSlider.addEventListener('input', function() {
+                currentVolume = parseInt(this.value);
+                volumeValue.textContent = currentVolume + "%";
+                bgMusic.volume = currentVolume / 100;
+                updateVolumeIcon();
+                
+                // 如果用户从静音状态调整音量，自动取消静音
+                if (currentVolume > 0 && volumeControl.classList.contains("muted")) {
+                    volumeControl.classList.remove("muted");
+                }
+                
+                // 保存状态并更新滑块背景
+                saveAudioState();
+                updateSliderBackground();
+            });
+            
+            // 音量预设按钮点击事件
+            volumePresets.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const presetVolume = parseInt(this.dataset.volume);
+                    currentVolume = presetVolume;
+                    volumeSlider.value = currentVolume;
+                    volumeValue.textContent = currentVolume + "%";
+                    updateVolumeIcon();
+                    bgMusic.volume = currentVolume / 100;
+                    
+                    // 如果设置了音量，取消静音状态
+                    if (currentVolume > 0 && volumeControl.classList.contains("muted")) {
+                        volumeControl.classList.remove("muted");
+                    }
+                    
+                    // 保存状态
+                    savedVolume = currentVolume;
+                    saveAudioState();
+                    
+                    // 添加点击反馈动画
+                    this.classList.add("active");
+                    setTimeout(() => {
+                        this.classList.remove("active");
+                    }, 200);
+                });
+            });
+            
+            // 更新音量图标
+            function updateVolumeIcon(customIcon) {
+                if (customIcon) {
+                    volumeIcon.textContent = customIcon;
+                    return;
+                }
+                
+                if (currentVolume == 0) {
+                    volumeIcon.textContent = "🔇";
+                } else if (currentVolume < 30) {
+                    volumeIcon.textContent = "🔈";
+                } else if (currentVolume < 70) {
+                    volumeIcon.textContent = "🔉";
+                } else {
+                    volumeIcon.textContent = "🔊";
+                }
+                
+                // 更新滑块的背景渐变，反映当前音量位置
+                updateSliderBackground();
+            }
+            
+            // 更新滑块背景渐变
+            function updateSliderBackground() {
+                const percentage = currentVolume;
+                const color1 = percentage < 30 ? '#ff5252' : percentage < 70 ? '#ffeb3b' : '#4caf50';
+                const color2 = percentage < 30 ? '#ffeb3b' : percentage < 70 ? '#4caf50' : '#2e7d32';
+                volumeSlider.style.background = `linear-gradient(to right, ${color1} 0%, ${color1} ${percentage}%, rgba(255,255,255,0.2) ${percentage}%, rgba(255,255,255,0.2) 100%)`;
+            }
+            
+            // 初始化滑块背景
+            updateSliderBackground();
+        });
+    </script>
+</body>
+</html>

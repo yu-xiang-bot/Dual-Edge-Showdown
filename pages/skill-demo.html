@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技能冷却效果演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .demo-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .character-section {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #4a90e2;
+        }
+
+        .skills-panel {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* 技能容器：相对定位，包含图标、进度条、倒计时 */
+        .skill-cooldown {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 技能图标：默认样式 - 方形/圆角矩形 */
+        .skill-cooldown .skill-icon {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7),
+                        inset 0 2px 4px rgba(255, 255, 255, 0.2);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(145deg, #2d2d3a, #1a1a24);
+            padding: 4px;
+        }
+
+        /* 技能图标内的图案 */
+        .skill-cooldown .skill-icon::before {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* 不同技能的图案 */
+        .skill-cooldown[data-skill="mana"] .skill-icon::before {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"%3E%3Cpath d="M24 4 L28 16 L40 16 L30 24 L34 36 L24 28 L14 36 L18 24 L8 16 L20 16 Z" fill="%23a78bfa"/%3E%3Ccircle cx="24" cy="24" r="8" fill="%236366f1"/%3E%3C/svg%3E');
+        }
+
+        .skill-cooldown[data-skill="fire"] .skill-icon::before {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"%3E%3Cellipse cx="24" cy="32" rx="16" ry="12" fill="%23fb923c"/%3E%3Cpath d="M24 8 Q28 16 24 20 Q20 16 24 8 Z" fill="%23fbbf24"/%3E%3Cpath d="M20 12 Q22 18 20 22 Q18 18 20 12 Z" fill="%23fcd34d"/%3E%3C/svg%3E');
+        }
+
+        .skill-cooldown[data-skill="shield"] .skill-icon::before {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"%3E%3Cpath d="M24 6 L38 12 V24 C38 32 32 40 24 42 C16 40 10 32 10 24 V12 L24 6 Z" fill="%2360a5fa"/%3E%3Ccircle cx="24" cy="24" r="8" fill="%233b82f6"/%3E%3C/svg%3E');
+        }
+
+        .skill-cooldown[data-skill="meteor"] .skill-icon::before {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"%3E%3Ccircle cx="24" cy="24" r="16" fill="%23f97316"/%3E%3Ccircle cx="24" cy="24" r="10" fill="%23ea580c"/%3E%3Ccircle cx="24" cy="24" r="4" fill="%23fbbf24"/%3E%3C/svg%3E');
+        }
+
+        .skill-cooldown[data-skill="servant"] .skill-icon::before {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"%3E%3Ccircle cx="24" cy="20" r="10" fill="%23fbbf24"/%3E%3Cpath d="M14 20 L18 30 L30 30 L34 20 Z" fill="%23f59e0b"/%3E%3Cpath d="M20 30 L24 42 L28 30 Z" fill="%23d97706"/%3E%3C/svg%3E');
+        }
+
+        .skill-cooldown[data-skill="blood"] .skill-icon::before {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"%3E%3Cpath d="M24 8 C24 8 12 16 12 26 C12 32 16 36 24 36 C32 36 36 32 36 26 C36 16 24 8 24 8 Z" fill="%238b5cf6"/%3E%3Ccircle cx="24" cy="28" r="6" fill="%23a78bfa"/%3E%3C/svg%3E');
+        }
+
+        .skill-cooldown[data-skill="shoot"] .skill-icon::before {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"%3E%3Crect x="12" y="22" width="20" height="4" fill="%2367e8f9"/%3E%3Crect x="30" y="20" width="8" height="8" fill="%230ea5e9"/%3E%3Ccircle cx="34" cy="24" r="3" fill="%23fbbf24"/%3E%3C/svg%3E');
+        }
+
+        .skill-cooldown[data-skill="dash"] .skill-icon::before {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"%3E%3Cpath d="M12 24 L20 18 L20 22 L36 22 L36 26 L20 26 L20 30 Z" fill="%23fbbf24"/%3E%3Cpath d="M22 24 L28 18 L28 22 L30 22 L30 26 L28 26 L28 30 Z" fill="%23f59e0b"/%3E%3C/svg%3E');
+        }
+
+        .skill-cooldown[data-skill="nuke"] .skill-icon::before {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"%3E%3Ccircle cx="24" cy="24" r="14" fill="%23dc2626"/%3E%3Ccircle cx="24" cy="24" r="8" fill="%23b91c1c"/%3E%3Ccircle cx="24" cy="24" r="3" fill="%23fbbf24"/%3E%3C/svg%3E');
+        }
+
+        .skill-cooldown[data-skill="machine"] .skill-icon::before {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"%3E%3Ccircle cx="24" cy="20" r="8" fill="%23fbbf24"/%3E%3Crect x="20" y="14" width="8" height="4" fill="%23f59e0b"/%3E%3Cpath d="M12 30 L18 24 L30 24 L36 30 L30 36 L18 36 Z" fill="%23d97706"/%3E%3Ccircle cx="24" cy="30" r="3" fill="%23fbbf24"/%3E%3C/svg%3E');
+        }
+
+        /* 环形进度条（核心动态效果） - 外围环绕 */
+        .skill-cooldown .cooldown-ring {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            width: calc(100% + 12px);
+            height: calc(100% + 12px);
+            border-radius: 50%;
+            /* 蓝色渐变环形条，从满环到消失（--progress控制剩余比例） */
+            background: conic-gradient(
+                from 0deg,
+                #4a90e2 0deg,
+                #3b82f6 var(--progress, 360deg),
+                transparent var(--progress, 360deg) 360deg
+            );
+            mask: radial-gradient(transparent 48%, #000 49%);
+            -webkit-mask: radial-gradient(transparent 48%, #000 49%);
+            transition: --progress 0.1s linear;
+            pointer-events: none;
+            box-shadow: 0 0 8px rgba(74, 144, 226, 0.4);
+        }
+
+        /* 冷却中状态 */
+        .skill-cooldown.cooling {
+            pointer-events: none;  /* 不可点击 */
+        }
+
+        .skill-cooldown.cooling .skill-icon {
+            opacity: 0.5;         /* 50%透明度 */
+            filter: grayscale(60%);  /* 灰度滤镜 */
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 冷却完成状态 */
+        .skill-cooldown.ready .cooldown-ring {
+            opacity: 0;
+            transform: scale(1.1);
+            transition: all 0.2s ease-out;
+        }
+
+        .skill-cooldown.ready .skill-icon {
+            opacity: 1;
+            filter: brightness(1.2) grayscale(0%);
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.8),
+                        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            animation: skillReadyPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* 冷却完成时的轻微放大+脉冲动画 */
+        @keyframes skillReadyPop {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.08);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* 冷却完成后的轻微脉冲（持续2秒） */
+        .skill-cooldown.ready.pulsing .skill-icon {
+            animation: skillReadyPulse 0.6s ease-in-out infinite;
+        }
+
+        @keyframes skillReadyPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(74, 144, 226, 0.8);
+            }
+            50% {
+                transform: scale(1.04);
+                box-shadow: 0 0 28px rgba(74, 144, 226, 1);
+            }
+        }
+
+        /* 数字倒计时样式 */
+        .skill-cooldown .countdown-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 15px;
+            font-weight: 800;
+            color: white;
+            /* 黑色文字阴影增强可读性 */
+            text-shadow: 0 0 3px #000, 0 0 6px #000, 2px 2px 4px rgba(0,0,0,0.8);
+            font-family: "Arial Black", sans-serif;
+            z-index: 2;
+            pointer-events: none;
+            letter-spacing: -0.5px;
+        }
+
+        /* 冷却完成：隐藏倒计时 */
+        .skill-cooldown.ready .countdown-text {
+            display: none;
+        }
+
+        /* 按键提示 */
+        .skill-cooldown .skill-key {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #ffffff, #e5e5e5);
+            border-radius: 6px;
+            color: #111;
+            font-weight: 800;
+            font-size: 13px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6),
+                        inset 0 1px 2px rgba(255, 255, 255, 0.8);
+            pointer-events: none;
+            z-index: 3;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* 大招特殊样式 - 金色环形条 */
+        .skill-cooldown.ultimate .cooldown-ring {
+            background: conic-gradient(
+                from 0deg,
+                #fbbf24 0deg,
+                #f59e0b var(--progress, 360deg),
+                transparent var(--progress, 360deg) 360deg
+            );
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .skill-cooldown.ultimate .skill-icon {
+            border-color: rgba(251, 191, 36, 0.7);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        }
+
+        .skill-cooldown.ultimate.ready .skill-icon {
+            box-shadow: 0 0 25px rgba(251, 191, 36, 1),
+                        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            animation: ultimateReadyPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes ultimateReadyPop {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.12);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .skill-cooldown.ultimate.ready.pulsing .skill-icon {
+            animation: ultimateReadyPulse 0.8s ease-in-out infinite;
+        }
+
+        @keyframes ultimateReadyPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 25px rgba(251, 191, 36, 1);
+            }
+            50% {
+                transform: scale(1.06);
+                box-shadow: 0 0 35px rgba(251, 191, 36, 1.2);
+            }
+        }
+
+        .skill-cooldown.ultimate .skill-key {
+            background: linear-gradient(145deg, #fff7c0, #fcd34d);
+            color: #000;
+        }
+
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 800px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .instructions h3 {
+            color: #4a90e2;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>⚔️ 技能冷却效果演示</h1>
+
+    <div class="demo-container">
+        <!-- 法师技能 -->
+        <div class="character-section">
+            <div class="section-title">🧙 法师技能</div>
+            <div class="skills-panel">
+                <div class="skill-cooldown" data-skill="mana" data-cooldown="8">
+                    <div class="skill-icon"></div>
+                    <div class="cooldown-ring"></div>
+                    <span class="countdown-text"></span>
+                    <div class="skill-key">X</div>
+                </div>
+                <div class="skill-cooldown" data-skill="fire" data-cooldown="0.85">
+                    <div class="skill-icon"></div>
+                    <div class="cooldown-ring"></div>
+                    <span class="countdown-text"></span>
+                    <div class="skill-key">B</div>
+                </div>
+                <div class="skill-cooldown" data-skill="shield" data-cooldown="8">
+                    <div class="skill-icon"></div>
+                    <div class="cooldown-ring"></div>
+                    <span class="countdown-text"></span>
+                    <div class="skill-key">C</div>
+                </div>
+                <div class="skill-cooldown" data-skill="meteor" data-cooldown="7">
+                    <div class="skill-icon"></div>
+                    <div class="cooldown-ring"></div>
+                    <span class="countdown-text"></span>
+                    <div class="skill-key">V</div>
+                </div>
+                <div class="skill-cooldown ultimate" data-skill="servant" data-cooldown="12">
+                    <div class="skill-icon"></div>
+                    <div class="cooldown-ring"></div>
+                    <span class="countdown-text">未就绪</span>
+                    <div class="skill-key">Q</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 机械师技能 -->
+        <div class="character-section">
+            <div class="section-title">🤖 机械师技能</div>
+            <div class="skills-panel">
+                <div class="skill-cooldown" data-skill="blood" data-cooldown="6">
+                    <div class="skill-icon"></div>
+                    <div class="cooldown-ring"></div>
+                    <span class="countdown-text"></span>
+                    <div class="skill-key">M</div>
+                </div>
+                <div class="skill-cooldown" data-skill="shoot" data-cooldown="0.3">
+                    <div class="skill-icon"></div>
+                    <div class="cooldown-ring"></div>
+                    <span class="countdown-text"></span>
+                    <div class="skill-key">/</div>
+                </div>
+                <div class="skill-cooldown" data-skill="dash" data-cooldown="1.2">
+                    <div class="skill-icon"></div>
+                    <div class="cooldown-ring"></div>
+                    <span class="countdown-text"></span>
+                    <div class="skill-key">,</div>
+                </div>
+                <div class="skill-cooldown" data-skill="nuke" data-cooldown="8">
+                    <div class="skill-icon"></div>
+                    <div class="cooldown-ring"></div>
+                    <span class="countdown-text"></span>
+                    <div class="skill-key">.</div>
+                </div>
+                <div class="skill-cooldown ultimate" data-skill="machine" data-cooldown="12">
+                    <div class="skill-icon"></div>
+                    <div class="cooldown-ring"></div>
+                    <span class="countdown-text">未就绪</span>
+                    <div class="skill-key">L</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>📖 使用说明</h3>
+        <ul>
+            <li>✨ <strong>点击任意技能图标</strong>即可触发冷却效果演示</li>
+            <li>⏱️ <strong>冷却中</strong>：图标变暗，环形进度条从0°→360°填充，中心显示剩余时间</li>
+            <li>✅ <strong>冷却完成</strong>：进度条消失，图标高亮发光，倒计时隐藏</li>
+            <li>🎯 <strong>普通技能</strong>：蓝色环形进度条</li>
+            <li>🌟 <strong>终极技能</strong>（Q/L）：金色环形进度条，特殊发光效果</li>
+        </ul>
+    </div>
+
+    <script>
+        // 播放技能就绪音效
+        function playSkillReadySound() {
+            // 创建简单的"叮"音效
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5音符
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+
+        // 为所有技能添加点击事件
+        document.querySelectorAll('.skill-cooldown').forEach(skill => {
+            skill.addEventListener('click', function() {
+                const cooldownTime = parseFloat(this.dataset.cooldown);
+                const countdownText = this.querySelector('.countdown-text');
+                let remaining = cooldownTime;
+
+                // 开始冷却
+                this.classList.remove('ready pulsing');
+                this.classList.add('cooling');
+
+                const interval = setInterval(() => {
+                    remaining -= 0.1;
+
+                    // 更新进度条角度：从满环(360度)到消失(0度)
+                    const progress = (remaining / cooldownTime) * 360;
+                    this.style.setProperty('--progress', `${progress}deg`);
+
+                    // 更新倒计时数字
+                    if (remaining > 0) {
+                        countdownText.textContent = remaining.toFixed(1) + 's';
+                    } else {
+                        // 冷却结束
+                        clearInterval(interval);
+                        remaining = cooldownTime;
+                        this.classList.remove('cooling');
+                        this.classList.add('ready pulsing');
+                        countdownText.textContent = '';
+
+                        // 播放"叮"的提示音
+                        playSkillReadySound();
+
+                        // 2秒后移除脉冲动画
+                        setTimeout(() => {
+                            this.classList.remove('pulsing');
+                        }, 2000);
+                    }
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>

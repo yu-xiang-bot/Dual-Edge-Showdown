@@ -1,0 +1,430 @@
+body{
+    background-image: url(../assets/images/cover.png);
+    background-size: cover;
+    background-position: top;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* START 按钮容器 */
+.start-button-container {
+    position: fixed;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+}
+
+/* START 链接 */
+.start-link {
+    text-decoration: none;
+    display: block;
+    position: relative;
+}
+
+/* START 按钮 - 暗黑战斗手绘风格 */
+.start-button {
+    position: relative;
+    padding: 28px 95px;
+    font-size: 46px;
+    font-weight: 900;
+    font-family: 'Impact', 'Arial Black', 'Cinzel Decorative', fantasy;
+    color: #ff3333;
+    background: linear-gradient(145deg, #1a0a0a 0%, #2d1010 50%, #1a0a0a 100%);
+    border: 6px solid #8b0000;
+    border-radius: 15px 18px 12px 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    text-shadow: 
+        3px 3px 0 #000000,
+        -1px -1px 0 #ff6666,
+        0 0 20px rgba(255, 0, 0, 0.8),
+        0 0 40px rgba(255, 0, 0, 0.4);
+    box-shadow: 
+        0 0 20px rgba(139, 0, 0, 0.8),
+        0 0 40px rgba(255, 0, 0, 0.4),
+        10px 10px 0 rgba(0, 0, 0, 0.9),
+        15px 15px 30px rgba(0, 0, 0, 0.7);
+    transition: all 0.3s ease;
+    animation: 
+        battle-pulse 2s ease-in-out infinite,
+        sword-wiggle 3s ease-in-out infinite;
+    transform: rotate(-1.5deg);
+    overflow: hidden;
+    z-index: 2;
+}
+
+/* 战斗纹理背景 */
+.start-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 10px,
+            rgba(255, 0, 0, 0.02) 10px,
+            rgba(255, 0, 0, 0.02) 20px
+        );
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: 0.6;
+}
+
+/* 手绘剑痕边框 */
+.start-button::after {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    border: 4px solid #ff0000;
+    border-radius: 18px 21px 15px 17px;
+    opacity: 0.5;
+    pointer-events: none;
+    animation: sword-slash 4s ease-in-out infinite;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+}
+
+/* 战斗装饰 - 交叉的剑 */
+.start-button-container::before {
+    content: '⚔';
+    position: absolute;
+    top: -85px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-45deg);
+    font-size: 55px;
+    color: #cc0000;
+    text-shadow: 3px 3px 0 #000000, 0 0 20px rgba(255, 0, 0, 0.8);
+    animation: weapon-swing 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.6));
+}
+
+/* 战斗装饰 - 盾牌 */
+.start-button-container::after {
+    content: '🛡';
+    position: absolute;
+    bottom: -80px;
+    left: 50%;
+    transform: translateX(-50%) rotate(15deg);
+    font-size: 50px;
+    color: #8b0000;
+    text-shadow: 3px 3px 0 #000000, 0 0 20px rgba(139, 0, 0, 0.8);
+    animation: shield-rotate 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px rgba(139, 0, 0, 0.6));
+}
+
+/* 血迹效果 */
+.start-button .blood-drip {
+    position: absolute;
+    width: 4px;
+    height: 15px;
+    background: linear-gradient(to bottom, #cc0000, #8b0000);
+    border-radius: 0 0 4px 4px;
+    opacity: 0.8;
+    animation: blood-drip 4s ease-in-out infinite;
+}
+
+/* 火焰装饰 */
+.start-button .flame {
+    position: absolute;
+    font-size: 24px;
+    color: #ff4400;
+    text-shadow: 0 0 10px rgba(255, 68, 0, 0.8);
+    animation: flame-flicker 0.5s ease-in-out infinite alternate;
+}
+
+/* 悬停效果 */
+.start-button:hover {
+    background: linear-gradient(145deg, #2d0a0a 0%, #3d1010 50%, #2d0a0a 100%);
+    border-color: #ff0000;
+    transform: rotate(1.5deg) scale(1.12);
+    text-shadow: 
+        3px 3px 0 #000000,
+        -1px -1px 0 #ff9999,
+        0 0 30px rgba(255, 0, 0, 1),
+        0 0 60px rgba(255, 0, 0, 0.6);
+    box-shadow: 
+        0 0 30px rgba(255, 0, 0, 1),
+        0 0 60px rgba(255, 0, 0, 0.6),
+        15px 15px 0 rgba(0, 0, 0, 0.95),
+        20px 20px 40px rgba(0, 0, 0, 0.8);
+    letter-spacing: 8px;
+}
+
+.start-button:hover::after {
+    opacity: 0.8;
+    border-color: #ff3333;
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+}
+
+/* 点击效果 */
+.start-button:active {
+    transform: rotate(0deg) scale(1.05);
+    box-shadow: 
+        0 0 20px rgba(255, 0, 0, 0.8),
+        5px 5px 0 rgba(0, 0, 0, 0.9),
+        10px 10px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* 战斗脉冲动画 */
+@keyframes battle-pulse {
+    0%, 100% {
+        box-shadow: 
+            0 0 20px rgba(139, 0, 0, 0.8),
+            0 0 40px rgba(255, 0, 0, 0.4),
+            10px 10px 0 rgba(0, 0, 0, 0.9),
+            15px 15px 30px rgba(0, 0, 0, 0.7);
+    }
+    50% {
+        box-shadow: 
+            0 0 30px rgba(255, 0, 0, 1),
+            0 0 60px rgba(255, 0, 0, 0.6),
+            10px 10px 0 rgba(0, 0, 0, 0.9),
+            15px 15px 30px rgba(0, 0, 0, 0.7);
+    }
+}
+
+/* 剑痕抖动动画 */
+@keyframes sword-wiggle {
+    0%, 100% {
+        border-radius: 15px 18px 12px 14px;
+        transform: rotate(-1.5deg);
+    }
+    25% {
+        border-radius: 18px 15px 14px 12px;
+        transform: rotate(-2deg);
+    }
+    50% {
+        border-radius: 12px 14px 18px 15px;
+        transform: rotate(-1deg);
+    }
+    75% {
+        border-radius: 14px 12px 15px 18px;
+        transform: rotate(-2.5deg);
+    }
+}
+
+/* 剑砍动画 */
+@keyframes sword-slash {
+    0%, 100% {
+        border-radius: 18px 21px 15px 17px;
+        transform: translate(-1px, -1px);
+        opacity: 0.5;
+    }
+    25% {
+        border-radius: 21px 18px 17px 15px;
+        transform: translate(1px, -2px);
+        opacity: 0.7;
+    }
+    50% {
+        border-radius: 15px 17px 21px 18px;
+        transform: translate(-2px, 1px);
+        opacity: 0.6;
+    }
+    75% {
+        border-radius: 17px 15px 18px 21px;
+        transform: translate(2px, 2px);
+        opacity: 0.8;
+    }
+}
+
+/* 武器摆动动画 */
+@keyframes weapon-swing {
+    0%, 100% {
+        transform: translateX(-50%) rotate(-45deg);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translateX(-50%) rotate(-30deg);
+        opacity: 1;
+    }
+}
+
+/* 盾牌旋转动画 */
+@keyframes shield-rotate {
+    0%, 100% {
+        transform: translateX(-50%) rotate(15deg);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translateX(-50%) rotate(25deg);
+        opacity: 0.9;
+    }
+}
+
+/* 血滴落动画 */
+@keyframes blood-drip {
+    0% {
+        transform: translateY(0);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+}
+
+/* 火焰闪烁动画 */
+@keyframes flame-flicker {
+    0% {
+        transform: scale(1) rotate(-5deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.1) rotate(5deg);
+        opacity: 1;
+    }
+}
+
+/* 闪电效果 */
+.start-button .lightning {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        transparent 40%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 60%
+    );
+    opacity: 0;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+.start-button:hover .lightning {
+    animation: lightning-flash 0.3s ease-out;
+}
+
+@keyframes lightning-flash {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* 碎片装饰 */
+.start-button .shatter {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #8b0000;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.start-button:hover .shatter {
+    animation: shatter-effect 0.5s ease-out forwards;
+}
+
+@keyframes shatter-effect {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .start-button {
+        padding: 24px 70px;
+        font-size: 36px;
+        letter-spacing: 3px;
+    }
+    
+    .start-button:hover {
+        letter-spacing: 5px;
+    }
+    
+    .start-button-container::before {
+        font-size: 45px;
+        top: -70px;
+    }
+    
+    .start-button-container::after {
+        font-size: 40px;
+        bottom: -65px;
+    }
+}
+
+@media (max-width: 480px) {
+    .start-button {
+        padding: 20px 50px;
+        font-size: 28px;
+        letter-spacing: 2px;
+        border-width: 5px;
+    }
+    
+    .start-button:hover {
+        letter-spacing: 3px;
+    }
+    
+    .start-button-container::before {
+        font-size: 35px;
+        top: -60px;
+    }
+    
+    .start-button-container::after {
+        font-size: 30px;
+        bottom: -55px;
+    }
+}
+
+
+
+.mage{
+    font-weight: 600;
+    color:blue;
+    position: absolute;
+    top:10%;
+    left:2%;
+    font-size: 40px;
+    display: inline-block;
+    line-height: 90px;
+}
+
+.mech{
+    font-weight: 600;
+    color:red;
+    position: absolute;
+    display: inline-block;
+    top:10%;
+    right:1%;
+    font-size: 40px;
+    line-height: 90px;
+}
+
+#language{
+    position: fixed;
+    bottom: 50px;
+    font-size: 20px;
+    left: 100px; 
+    width: 100px;
+    height: 70px;
+}

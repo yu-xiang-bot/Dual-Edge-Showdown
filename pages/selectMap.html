@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>双锋对决 - 选择地图</title>
+        <link rel = "stylesheet" href = "../styles/new.css"/>
+        <link rel = "icon" href = "../favicon.ico" type = "image/x-icon" />
+        <script src="../scripts/jquery.min.js"></script>
+        <!-- Supabase客户端库 -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+        <!-- Supabase数据库连接 -->
+        <script src="../scripts/supabase.js"></script>
+        <!-- 游戏数据管理器 -->
+        <script src="../scripts/game-data-manager.js"></script>
+        <!-- 游戏数据集成 -->
+        <script src="../scripts/game-integration.js"></script>
+        <!-- 游戏控制脚本 -->
+        <script src="../scripts/control.js"></script>
+    </head>
+    <body>
+        <div class = "map-selection" id="mapSelection">
+            <div class="map-selection-content">
+                <div class="map-selection-header">
+                    <h2>选择地图</h2>
+                    <p>选择一个地图进行三局两胜的对决</p>
+                </div>
+                <div class="map-selection-body">
+                    <div class="map-grid">
+                        <div class="map-item" data-map="0">
+                            <div class="map-preview" style="background-image: url(../assets/images/backgrounds/background1.png)"></div>
+                            <div class="map-name">城镇广场</div>
+                        </div>
+                        <div class="map-item" data-map="1">
+                            <div class="map-preview" style="background-image: url(../assets/images/backgrounds/background2.png)"></div>
+                            <div class="map-name">峭壁之战</div>
+                        </div>
+                        <div class="map-item" data-map="2">
+                            <div class="map-preview" style="background-image: url(../assets/images/backgrounds/background3.png)"></div>
+                            <div class="map-name">地下矿井</div>
+                        </div>
+                        <div class="map-item" data-map="3">
+                            <div class="map-preview" style="background-image: url(../assets/images/backgrounds/background4.png)"></div>
+                            <div class="map-name">天空之城</div>
+                        </div>
+                        <div class="map-item" data-map="4">
+                            <div class="map-preview" style="background-image: url(../assets/images/backgrounds/background5.png)"></div>
+                            <div class="map-name">火山熔岩</div>
+                        </div>
+                        <div class="map-item" data-map="5">
+                            <div class="map-preview" style="background-image: url(../assets/images/backgrounds/background6.png)"></div>
+                            <div class="map-name">冰雪要塞</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加载页面 -->
+        <div class="loading-page" id="loadingPage">
+            <!-- 加载页面视频背景 -->
+            <video class="loading-video-bg" autoplay muted loop>
+                <source src="../assets/images/mainImage.mp4" type="video/mp4">
+                您的浏览器不支持HTML5视频。
+            </video>
+            <div class="loading-content">
+                <h2>加载中...</h2>
+                <div class="loading-bar-container">
+                    <div class="loading-bar" id="loadingBar"></div>
+                </div>
+                <div class="loading-percentage" id="loadingPercentage">0%</div>
+            </div>
+        </div>
+    </body>
+</html>

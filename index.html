@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <title>双锋对决</title>
+        <link rel = "stylesheet" href = "styles/cover.css"/>
+        <link rel = "stylesheet" href = "styles/new.css"/>
+        <link rel = "icon" href = "favicon.ico" type = "image/x-icon" />
+    </head>
+    <body>
+        <!-- 背景音乐 -->
+        <audio id="bgMusic" loop>
+            <source src="assets/sounds/effects/mainMusic.mp3" type="audio/mpeg">
+        </audio>
+        
+        <!-- 音量控制 -->
+        <div class="volume-control" id="volumeControl">
+            <div class="volume-icon" id="volumeIcon">🔊</div>
+            <div class="volume-slider-container" id="volumeSliderContainer">
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+                <div class="volume-value" id="volumeValue">70%</div>
+                <div class="volume-presets">
+                    <button class="volume-preset-btn" data-volume="0">0</button>
+                    <button class="volume-preset-btn" data-volume="25">25</button>
+                    <button class="volume-preset-btn" data-volume="50">50</button>
+                    <button class="volume-preset-btn" data-volume="75">75</button>
+                    <button class="volume-preset-btn" data-volume="100">100</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- START 按钮 -->
+        <div class="start-button-container">
+            <a href="pages/login.html" class="start-link">
+                <button class="start-button">
+                    START
+                    <!-- 血迹效果 -->
+                    <span class="blood-drip" style="left: 10%; animation-delay: 0s;"></span>
+                    <span class="blood-drip" style="left: 30%; animation-delay: 1s;"></span>
+                    <span class="blood-drip" style="left: 70%; animation-delay: 2s;"></span>
+                    <span class="blood-drip" style="left: 90%; animation-delay: 1.5s;"></span>
+                    <!-- 火焰装饰 -->
+                    <span class="flame" style="top: -15px; left: 20%;">🔥</span>
+                    <span class="flame" style="top: -15px; right: 20%; animation-delay: 0.25s;">🔥</span>
+                    <!-- 闪电效果 -->
+                    <span class="lightning"></span>
+                    <!-- 碎片效果 -->
+                    <span class="shatter" style="top: 20%; left: 10%;"></span>
+                    <span class="shatter" style="top: 30%; right: 15%; animation-delay: 0.1s;"></span>
+                    <span class="shatter" style="bottom: 25%; left: 25%; animation-delay: 0.2s;"></span>
+                    <span class="shatter" style="bottom: 35%; right: 20%; animation-delay: 0.15s;"></span>
+                </button>
+            </a>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const bgMusic = document.getElementById('bgMusic');
+                const volumeIcon = document.getElementById('volumeIcon');
+                const volumeSlider = document.getElementById('volumeSlider');
+                const volumeValue = document.getElementById('volumeValue');
+                const volumeControl = document.getElementById('volumeControl');
+                const volumePresets = document.querySelectorAll('.volume-preset-btn');
+                
+                // 从localStorage读取音量状态，如果没有则使用默认值70%
+                let currentVolume = parseInt(localStorage.getItem('bgmVolume')) || 70;
+                let savedVolume = parseInt(localStorage.getItem('bgmSavedVolume')) || 70;
+                let isMusicPlaying = false;
+                
+                // 设置初始音量和UI
+                bgMusic.volume = currentVolume / 100;
+                volumeSlider.value = currentVolume;
+                volumeValue.textContent = currentVolume + "%";
+                updateVolumeIcon();
+                updateSliderBackground();
+                
+                // 检查并保存音频状态到localStorage
+                function saveAudioState() {
+                    localStorage.setItem('bgmVolume', currentVolume);
+                    localStorage.setItem('bgmSavedVolume', savedVolume);
+                    localStorage.setItem('bgmIsPlaying', !bgMusic.paused);
+                    if (!bgMusic.paused) {
+                        localStorage.setItem('bgmCurrentTime', bgMusic.currentTime);
+                    }
+                }
+                
+                // 从localStorage恢复音频状态
+                function restoreAudioState() {
+                    const savedIsPlaying = localStorage.getItem('bgmIsPlaying');
+                    const savedCurrentTime = localStorage.getItem('bgmCurrentTime');
+                    
+                    if (savedIsPlaying === 'true' && savedCurrentTime) {
+                        bgMusic.currentTime = parseFloat(savedCurrentTime);
+                        bgMusic.play().then(() => {
+                            isMusicPlaying = true;
+                            console.log('背景音乐从上次位置继续播放');
+                        }).catch(error => {
+                            console.log('背景音乐播放失败:', error);
+                        });
+                    }
+                }
+                
+                // 页面卸载时保存状态
+                window.addEventListener('beforeunload', saveAudioState);
+                
+                // 页面加载时恢复状态
+                restoreAudioState();
+                
+                // 点击页面任意位置开始播放音乐（解决浏览器自动播放限制）
+                document.addEventListener('click', function initMusic() {
+                    if (!isMusicPlaying) {
+                        bgMusic.play().then(() => {
+                            isMusicPlaying = true;
+                            console.log('背景音乐开始播放');
+                        }).catch(error => {
+                            console.log('背景音乐播放失败:', error);
+                        });
+                        
+                        // 移除事件监听器
+                        document.removeEventListener('click', initMusic);
+                    }
+                }, { once: true });
+                
+                // 音量图标点击事件
+                volumeIcon.addEventListener('click', function() {
+                    if (currentVolume > 0) {
+                        // 保存当前音量并静音
+                        savedVolume = currentVolume;
+                        currentVolume = 0;
+                        volumeSlider.value = 0;
+                        volumeValue.textContent = "0%";
+                        updateVolumeIcon("🔇");
+                        volumeControl.classList.add("muted");
+                    } else {
+                        // 恢复之前的音量
+                        currentVolume = savedVolume || 70;
+                        volumeSlider.value = currentVolume;
+                        volumeValue.textContent = currentVolume + "%";
+                        updateVolumeIcon();
+                        volumeControl.classList.remove("muted");
+                    }
+                    bgMusic.volume = currentVolume / 100;
+                    saveAudioState();
+                });
+                
+                // 音量滑块变化事件
+                volumeSlider.addEventListener('input', function() {
+                    currentVolume = parseInt(this.value);
+                    volumeValue.textContent = currentVolume + "%";
+                    bgMusic.volume = currentVolume / 100;
+                    updateVolumeIcon();
+                    
+                    // 如果用户从静音状态调整音量，自动取消静音
+                    if (currentVolume > 0 && volumeControl.classList.contains("muted")) {
+                        volumeControl.classList.remove("muted");
+                    }
+                    
+                    // 保存状态并更新滑块背景
+                    saveAudioState();
+                    updateSliderBackground();
+                });
+                
+                // 音量预设按钮点击事件
+                volumePresets.forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const presetVolume = parseInt(this.dataset.volume);
+                        currentVolume = presetVolume;
+                        volumeSlider.value = currentVolume;
+                        volumeValue.textContent = currentVolume + "%";
+                        updateVolumeIcon();
+                        bgMusic.volume = currentVolume / 100;
+                        
+                        // 如果设置了音量，取消静音状态
+                        if (currentVolume > 0 && volumeControl.classList.contains("muted")) {
+                            volumeControl.classList.remove("muted");
+                        }
+                        
+                        // 保存状态
+                        savedVolume = currentVolume;
+                        saveAudioState();
+                        
+                        // 添加点击反馈动画
+                        this.classList.add("active");
+                        setTimeout(() => {
+                            this.classList.remove("active");
+                        }, 200);
+                    });
+                });
+                
+                // 更新音量图标
+                function updateVolumeIcon(customIcon) {
+                    if (customIcon) {
+                        volumeIcon.textContent = customIcon;
+                        return;
+                    }
+                    
+                    if (currentVolume == 0) {
+                        volumeIcon.textContent = "🔇";
+                    } else if (currentVolume < 30) {
+                        volumeIcon.textContent = "🔈";
+                    } else if (currentVolume < 70) {
+                        volumeIcon.textContent = "🔉";
+                    } else {
+                        volumeIcon.textContent = "🔊";
+                    }
+                    
+                    // 更新滑块的背景渐变，反映当前音量位置
+                    updateSliderBackground();
+                }
+                
+                // 更新滑块背景渐变
+                function updateSliderBackground() {
+                    const percentage = currentVolume;
+                    const color1 = percentage < 30 ? '#ff5252' : percentage < 70 ? '#ffeb3b' : '#4caf50';
+                    const color2 = percentage < 30 ? '#ffeb3b' : percentage < 70 ? '#4caf50' : '#2e7d32';
+                    volumeSlider.style.background = `linear-gradient(to right, ${color1} 0%, ${color1} ${percentage}%, rgba(255,255,255,0.2) ${percentage}%, rgba(255,255,255,0.2) 100%)`;
+                }
+                
+                // 初始化滑块背景
+                updateSliderBackground();
+            });
+        </script>
+
+    </body>
+</html>

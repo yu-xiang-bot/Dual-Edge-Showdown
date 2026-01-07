@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase数据库连接 -->
+  <script src="../scripts/supabase.js"></script>
+  <script src="../scripts/playtime-tracker.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人信息 - Dual Edge Showdown</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'Arial', sans-serif;
+            background-image: url('../assets/images/userBcke.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(15, 15, 25, 0.4), rgba(30, 30, 40, 0.3));
+            z-index: -1;
+        }
+        
+        .userinfo-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .userinfo-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+        
+        .userinfo-title {
+            text-align: center;
+            font-size: 2rem;
+            color: #ffffff;
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        
+        .userinfo-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+            border-radius: 1px;
+        }
+        
+        .userinfo-avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .userinfo-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .avatar-upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .userinfo-avatar:hover .avatar-upload-overlay {
+            opacity: 1;
+        }
+        
+        .avatar-upload-text {
+            color: white;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        .avatar-upload-container {
+            display: none;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 15px;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+        
+        .avatar-upload-container.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .avatar-upload-btn {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .avatar-upload-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .avatar-upload-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 10px;
+            display: block;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .userinfo-details {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .userinfo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .userinfo-item.bio-item {
+            align-items: flex-start;
+            padding-bottom: 15px;
+        }
+        
+        .userinfo-item.username-item {
+            padding-bottom: 15px;
+        }
+        
+        .edit-btn {
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+        
+        .edit-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .bio-edit-container {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .bio-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: vertical;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .bio-input:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .bio-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .char-counter {
+            text-align: right;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+        }
+        
+        .bio-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .save-btn, .cancel-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .save-btn {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.8), rgba(76, 175, 80, 0.6));
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .save-btn:hover {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.9), rgba(76, 175, 80, 0.7));
+            transform: translateY(-2px);
+        }
+        
+        .cancel-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .username-edit-container {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .username-input {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .username-input:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .username-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .username-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .userinfo-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+        
+        .userinfo-label {
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .userinfo-value {
+            color: #ffffff;
+            font-size: 1rem;
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .back-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 30px;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.8), rgba(76, 175, 80, 0.6));
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .back-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .back-button:hover {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.9), rgba(76, 175, 80, 0.7));
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+            .back-button:hover::before {
+                left: 100%;
+            }
+
+        .level-progress-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .level-progress-bar {
+            height: 24px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .level-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A, #AED581);
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .level-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        .level-progress-fill.level-up {
+            animation: levelUpPulse 0.8s ease-out;
+            background: linear-gradient(90deg, #FFD700, #FFA500, #FF6347);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes levelUpPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.02); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .level-progress-text {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.85);
+            text-align: right;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .level-progress-info {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .level-up-badge {
+            display: none;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 8px;
+            animation: badgeAppear 0.5s ease-out;
+        }
+
+        .level-up-badge.show {
+            display: inline-block;
+        }
+
+        @keyframes badgeAppear {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* 音量控制样式 - 与游戏页面一致 */
+        .volume-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(30, 30, 40, 0.85), rgba(20, 20, 30, 0.9));
+            border-radius: 30px;
+            padding: 8px 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .volume-control:hover {
+            background: linear-gradient(135deg, rgba(40, 40, 50, 0.95), rgba(30, 30, 40, 0.95));
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .volume-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-icon:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: scale(1.1);
+        }
+
+        .volume-icon:active {
+            transform: scale(0.95);
+        }
+
+        .volume-slider-container {
+            display: flex;
+            align-items: center;
+            margin-left: 12px;
+            opacity: 0;
+            max-width: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .volume-control:hover .volume-slider-container {
+            opacity: 1;
+            max-width: 180px;
+            margin-left: 12px;
+        }
+
+        .volume-slider {
+            width: 120px;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #ff5252 0%, #ff5252 30%, #ffeb3b 30%, #ffeb3b 70%, #4caf50 70%, #4caf50 100%);
+            outline: none;
+            border-radius: 3px;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider:hover::-webkit-slider-thumb {
+            transform: scale(1.2);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider:hover::-moz-range-thumb {
+            transform: scale(1.2);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-value {
+            margin-left: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            min-width: 40px;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 添加音量预设按钮 */
+        .volume-presets {
+            display: flex;
+            margin-left: 10px;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .volume-control:hover .volume-presets {
+            opacity: 1;
+        }
+
+        .volume-preset-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .volume-preset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .volume-preset-btn:active {
+            transform: scale(0.95);
+        }
+
+        .volume-preset-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.15);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* 为静音状态添加特殊样式 */
+        .volume-control.muted .volume-icon {
+            color: #ff5252;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .volume-control {
+                top: 15px;
+                right: 15px;
+                padding: 6px 12px;
+            }
+
+            .volume-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 18px;
+            }
+
+            .volume-slider {
+                width: 90px;
+            }
+
+            .volume-value {
+                font-size: 12px;
+                min-width: 35px;
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .userinfo-container {
+                padding: 25px;
+            }
+            
+            .userinfo-title {
+                font-size: 1.5rem;
+            }
+            
+            .userinfo-avatar {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .userinfo-item {
+                padding: 10px 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .userinfo-container {
+                padding: 20px;
+            }
+            
+            .userinfo-title {
+                font-size: 1.3rem;
+            }
+            
+            .userinfo-avatar {
+                width: 90px;
+                height: 90px;
+            }
+            
+            .userinfo-label, .userinfo-value {
+                font-size: 0.9rem;
+            }
+            
+            .back-button {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+    </head>
+<body>
+    <!-- 背景音乐 -->
+    <audio id="bgMusic" loop>
+        <source src="../assets/sounds/effects/mainMusic.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- 音量控制 -->
+    <div class="volume-control" id="volumeControl">
+        <div class="volume-icon" id="volumeIcon">🔊</div>
+        <div class="volume-slider-container" id="volumeSliderContainer">
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+            <div class="volume-value" id="volumeValue">70%</div>
+            <div class="volume-presets">
+                <button class="volume-preset-btn" data-volume="0">0</button>
+                <button class="volume-preset-btn" data-volume="25">25</button>
+                <button class="volume-preset-btn" data-volume="50">50</button>
+                <button class="volume-preset-btn" data-volume="75">75</button>
+                <button class="volume-preset-btn" data-volume="100">100</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="userinfo-container">
+        <h1 class="userinfo-title">个人信息</h1>
+        <div style="position: relative; display: inline-block;">
+            <img src="../assets/images/avatar-default.svg" alt="用户头像" class="userinfo-avatar" id="user-avatar">
+            <div class="avatar-upload-overlay" id="avatar-upload-overlay">
+                <div class="avatar-upload-text">点击上传头像</div>
+            </div>
+        </div>
+        <div class="avatar-upload-container" id="avatar-upload-container">
+            <input type="file" id="avatar-file-input" accept="image/*" style="display: none;">
+            <button class="avatar-upload-btn" id="avatar-upload-btn">选择图片文件</button>
+            <img src="" alt="头像预览" class="avatar-preview" id="avatar-preview" style="display: none;">
+            <div class="avatar-upload-actions" id="avatar-upload-actions" style="display: none;">
+                <button class="save-btn" id="save-avatar-btn">保存头像</button>
+                <button class="cancel-btn" id="cancel-avatar-btn">取消</button>
+            </div>
+        </div>
+        <div class="userinfo-details">
+            <div class="userinfo-item username-item">
+                <span class="userinfo-label">用户名</span>
+                <span class="userinfo-value" id="username-display">玩家一号</span>
+                <button class="edit-btn" id="edit-username-btn">编辑</button>
+            </div>
+            <div class="username-edit-container" id="username-edit-container">
+                <input type="text" class="username-input" id="username-input" maxlength="20" placeholder="请输入用户名（最多20个字符）">
+                <div class="username-actions">
+                    <button class="save-btn" id="save-username-btn">保存</button>
+                    <button class="cancel-btn" id="cancel-username-btn">取消</button>
+                </div>
+            </div>
+            <div class="userinfo-item">
+                <span class="userinfo-label">邮箱</span>
+                <span class="userinfo-value" id="email-display">player@example.com</span>
+            </div>
+            <div class="userinfo-item">
+                <span class="userinfo-label">等级</span>
+                <span class="userinfo-value" id="level-display">Lv. 1</span>
+            </div>
+            <div class="userinfo-item">
+                <span class="userinfo-label">游戏时长</span>
+                <span class="userinfo-value" id="playtime-display">0 小时</span>
+            </div>
+            <div class="userinfo-item">
+                <span class="userinfo-label">升级进度</span>
+                <div class="level-progress-container">
+                    <div class="level-progress-bar">
+                        <div class="level-progress-fill" id="level-progress-fill"></div>
+                    </div>
+                    <div class="level-progress-text">
+                        <span id="level-progress-text">0%</span>
+                        <span id="level-progress-info" class="level-progress-info"></span>
+                        <span id="level-up-badge" class="level-up-badge">升级!</span>
+                    </div>
+                </div>
+            </div>
+            <div class="userinfo-item bio-item">
+                <span class="userinfo-label">个人介绍</span>
+                <span class="userinfo-value" id="bio-display">热爱游戏，享受竞技的乐趣</span>
+                <button class="edit-btn" id="edit-bio-btn">编辑</button>
+            </div>
+            <div class="bio-edit-container" id="bio-edit-container">
+                <textarea class="bio-input" id="bio-input" maxlength="100" placeholder="请输入个人介绍（最多100字）">热爱游戏，享受竞技的乐趣</textarea>
+                <div class="char-counter">
+                    <span id="char-count">18</span>/100
+                </div>
+                <div class="bio-actions">
+                    <button class="save-btn" id="save-bio-btn">保存</button>
+                    <button class="cancel-btn" id="cancel-bio-btn">取消</button>
+                </div>
+            </div>
+        </div>
+        <button class="back-button" onclick="event.preventDefault(); goBack()">返回游戏</button>
+    </div>
+
+    <script>
+        function goBack() {
+            console.log('个人信息页面返回按钮被点击，返回到游戏主菜单');
+            window.location.href = './game.html';  // 返回到游戏主菜单页面
+        }
+        
+        // 个人信息编辑功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载用户等级信息
+            loadUserLevelInfo();
+
+            // 个人介绍相关元素
+            const editBioBtn = document.getElementById('edit-bio-btn');
+            const saveBioBtn = document.getElementById('save-bio-btn');
+            const cancelBioBtn = document.getElementById('cancel-bio-btn');
+            const bioDisplay = document.getElementById('bio-display');
+            const bioEditContainer = document.getElementById('bio-edit-container');
+            const bioInput = document.getElementById('bio-input');
+            
+            // 用户名相关元素
+            const editUsernameBtn = document.getElementById('edit-username-btn');
+            const saveUsernameBtn = document.getElementById('save-username-btn');
+            const cancelUsernameBtn = document.getElementById('cancel-username-btn');
+            const usernameDisplay = document.getElementById('username-display');
+            const usernameEditContainer = document.getElementById('username-edit-container');
+            const usernameInput = document.getElementById('username-input');
+            
+            // 从localStorage加载保存的用户信息
+            const savedUsername = localStorage.getItem('username');
+            const savedBio = localStorage.getItem('userBio');
+            const savedEmail = localStorage.getItem('userEmail');
+            
+            // 加载用户名
+            if (savedUsername) {
+                usernameDisplay.textContent = savedUsername;
+                usernameInput.value = savedUsername;
+            }
+            
+            // 加载邮箱
+            if (savedEmail) {
+                document.getElementById('email-display').textContent = savedEmail;
+            } else {
+                // 如果没有保存的邮箱，尝试从登录信息获取
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (user && user.email) {
+                    document.getElementById('email-display').textContent = user.email;
+                    localStorage.setItem('userEmail', user.email);
+                }
+            }
+            
+            // 加载个人介绍
+            if (savedBio) {
+                bioDisplay.textContent = savedBio;
+                bioInput.value = savedBio;
+            }
+            
+            // 个人介绍编辑功能
+            editBioBtn.addEventListener('click', function(e) {
+                bioEditContainer.style.display = 'flex';
+                editBioBtn.style.display = 'none';
+                bioInput.focus();
+            });
+            
+            saveBioBtn.addEventListener('click', function(e) {
+                const newBio = bioInput.value.trim();
+                if (newBio) {
+                    bioDisplay.textContent = newBio;
+                    localStorage.setItem('userBio', newBio);
+                    closeBioEditMode();
+                }
+            });
+            
+            cancelBioBtn.addEventListener('click', function(e) {
+                bioInput.value = bioDisplay.textContent;
+                closeBioEditMode();
+            });
+            
+            // 用户名编辑功能
+            editUsernameBtn.addEventListener('click', function(e) {
+                usernameEditContainer.style.display = 'flex';
+                editUsernameBtn.style.display = 'none';
+                usernameInput.focus();
+                usernameInput.select();
+            });
+            
+            saveUsernameBtn.addEventListener('click', function(e) {
+                const newUsername = usernameInput.value.trim();
+                if (newUsername) {
+                    usernameDisplay.textContent = newUsername;
+                    localStorage.setItem('username', newUsername);
+                    closeUsernameEditMode();
+                }
+            });
+            
+            cancelUsernameBtn.addEventListener('click', function(e) {
+                usernameInput.value = usernameDisplay.textContent;
+                closeUsernameEditMode();
+            });
+            
+            // 关闭个人介绍编辑模式
+            function closeBioEditMode() {
+                bioEditContainer.style.display = 'none';
+                editBioBtn.style.display = 'block';
+            }
+            
+            // 关闭用户名编辑模式
+            function closeUsernameEditMode() {
+                usernameEditContainer.style.display = 'none';
+                editUsernameBtn.style.display = 'block';
+            }
+            
+            // 字符计数功能
+            const charCount = document.getElementById('char-count');
+            updateCharCount();
+            
+            bioInput.addEventListener('input', function() {
+                updateCharCount();
+            });
+            
+            function updateCharCount() {
+                const currentLength = bioInput.value.length;
+                charCount.textContent = currentLength;
+                
+                // 当接近字数限制时改变颜色
+                if (currentLength > 90) {
+                    charCount.style.color = 'rgba(255, 100, 100, 0.9)';
+                } else {
+                    charCount.style.color = 'rgba(255, 255, 255, 0.6)';
+                }
+            }
+            
+            // 添加回车键保存功能
+            usernameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    saveUsernameBtn.click();
+                }
+            });
+            
+            bioInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault(); // 防止换行
+                    saveBioBtn.click();
+                }
+            });
+        });
+
+        // 加载用户等级信息
+        let previousLevel = 0;
+        let previousProgress = 0;
+        let autoUpdateInterval = null;
+
+        async function loadUserLevelInfo() {
+            try {
+                console.log('开始加载用户等级信息...');
+
+                // 等待Supabase初始化完成
+                if (window.userDataManagerReady) {
+                    await window.userDataManagerReady;
+                }
+
+                // 等待userDataManager可用
+                let retryCount = 0;
+                while (!window.userDataManager && retryCount < 50) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    retryCount++;
+                }
+
+                if (!window.userDataManager || !window.userDataManager.currentUser) {
+                    console.log('用户未登录，使用默认等级');
+                    updateLevelDisplay({
+                        currentLevel: 1,
+                        totalHours: 0,
+                        progress: 0,
+                        minutesToNextLevel: 300,
+                        currentLevelRequiredMinutes: 0
+                    });
+                    return;
+                }
+
+                // 获取用户等级信息
+                const levelInfo = await window.userDataManager.getUserLevelInfo();
+
+                if (levelInfo) {
+                    console.log('获取到等级信息:', levelInfo);
+                    updateLevelDisplay(levelInfo);
+
+                    // 启动自动更新（每30秒）
+                    startAutoUpdate();
+                } else {
+                    console.log('获取等级信息失败，使用默认值');
+                    updateLevelDisplay({
+                        currentLevel: 1,
+                        totalHours: 0,
+                        progress: 0,
+                        minutesToNextLevel: 300,
+                        currentLevelRequiredMinutes: 0
+                    });
+                }
+            } catch (error) {
+                console.error('加载用户等级信息失败:', error);
+                updateLevelDisplay({
+                    currentLevel: 1,
+                    totalHours: 0,
+                    progress: 0,
+                    minutesToNextLevel: 300,
+                    currentLevelRequiredMinutes: 0
+                });
+            }
+        }
+
+        // 启动自动更新
+        function startAutoUpdate() {
+            if (autoUpdateInterval) {
+                clearInterval(autoUpdateInterval);
+            }
+
+            autoUpdateInterval = setInterval(async () => {
+                if (!window.userDataManager || !window.userDataManager.currentUser) {
+                    clearInterval(autoUpdateInterval);
+                    autoUpdateInterval = null;
+                    return;
+                }
+
+                try {
+                    const levelInfo = await window.userDataManager.getUserLevelInfo();
+                    if (levelInfo) {
+                        updateLevelDisplay(levelInfo);
+                    }
+                } catch (error) {
+                    console.error('自动更新等级信息失败:', error);
+                }
+            }, 30000); // 每30秒更新一次
+
+            console.log('已启动等级信息自动更新');
+        }
+
+        // 格式化时长
+        function formatDuration(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = Math.floor(minutes % 60);
+            if (hours > 0) {
+                return `${hours}小时${mins}分钟`;
+            }
+            return `${mins}分钟`;
+        }
+
+        // 更新等级显示
+        function updateLevelDisplay(levelInfo) {
+            const currentLevel = parseInt(levelInfo.currentLevel) || 1;
+            const progress = Math.min(100, Math.max(0, parseFloat(levelInfo.progress) || 0));
+            const minutesToNext = parseFloat(levelInfo.minutesToNextLevel) || 300;
+            const currentRequired = parseFloat(levelInfo.currentLevelRequiredMinutes) || 0;
+            const totalMinutes = parseFloat(levelInfo.totalMinutes) || 0;
+
+            // 更新等级
+            document.getElementById('level-display').textContent = `Lv. ${currentLevel}`;
+
+            // 更新游戏时长
+            document.getElementById('playtime-display').textContent = `${levelInfo.totalHours} 小时`;
+
+            // 更新升级进度条
+            const progressFill = document.getElementById('level-progress-fill');
+            progressFill.style.width = `${progress}%`;
+
+            // 检测是否升级
+            if (currentLevel > previousLevel && previousLevel > 0) {
+                // 显示升级效果
+                progressFill.classList.add('level-up');
+                const badge = document.getElementById('level-up-badge');
+                badge.classList.add('show');
+
+                // 3秒后移除升级效果
+                setTimeout(() => {
+                    progressFill.classList.remove('level-up');
+                    badge.classList.remove('show');
+                }, 3000);
+
+                console.log(`升级了！从 ${previousLevel} 升级到 ${currentLevel}`);
+            }
+
+            // 更新进度文本
+            const progressText = document.getElementById('level-progress-text');
+            progressText.textContent = `${progress.toFixed(1)}%`;
+
+            // 更新进度信息
+            const progressInfo = document.getElementById('level-progress-info');
+            const playedAtCurrentLevel = totalMinutes - currentRequired;
+            const remainingMinutes = minutesToNext - playedAtCurrentLevel;
+
+            if (remainingMinutes > 0) {
+                progressInfo.textContent = `还需 ${formatDuration(remainingMinutes)} 升级`;
+            } else {
+                progressInfo.textContent = `即将升级!`;
+            }
+
+            // 保存当前状态
+            previousLevel = currentLevel;
+            previousProgress = progress;
+
+            console.log('等级显示已更新:', levelInfo);
+        }
+        
+        // 头像上传功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const avatar = document.getElementById('user-avatar');
+            const avatarUploadOverlay = document.getElementById('avatar-upload-overlay');
+            const avatarUploadContainer = document.getElementById('avatar-upload-container');
+            const avatarFileInput = document.getElementById('avatar-file-input');
+            const avatarUploadBtn = document.getElementById('avatar-upload-btn');
+            const avatarPreview = document.getElementById('avatar-preview');
+            const avatarUploadActions = document.getElementById('avatar-upload-actions');
+            const saveAvatarBtn = document.getElementById('save-avatar-btn');
+            const cancelAvatarBtn = document.getElementById('cancel-avatar-btn');
+            
+            // 加载用户头像
+            loadUserAvatar();
+            
+            // 点击头像或覆盖层触发上传
+            avatar.addEventListener('click', function(e) {
+                avatarFileInput.click();
+            });
+            
+            avatarUploadOverlay.addEventListener('click', function(e) {
+                avatarFileInput.click();
+            });
+            
+            avatarUploadBtn.addEventListener('click', function(e) {
+                avatarFileInput.click();
+            });
+            
+            // 文件选择事件
+            avatarFileInput.addEventListener('change', function(e) {
+                console.log('文件选择事件触发');
+                const file = e.target.files[0];
+                if (file) {
+                    console.log('选择了文件:', file.name, '类型:', file.type, '大小:', file.size);
+                    
+                    // 验证文件类型
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!allowedTypes.includes(file.type)) {
+                        alert('请选择图片文件！支持 JPG、PNG、GIF 和 WebP 格式');
+                        avatarFileInput.value = '';
+                        return;
+                    }
+                    
+                    // 验证文件大小（限制为2MB）
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('图片大小不能超过2MB！');
+                        avatarFileInput.value = '';
+                        return;
+                    }
+                    
+                    // 显示上传区域和预览
+                    avatarUploadContainer.classList.add('active');
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        console.log('文件读取完成，显示预览');
+                        avatarPreview.src = e.target.result;
+                        avatarPreview.style.display = 'block';
+                        avatarUploadActions.style.display = 'flex';
+                    };
+                    reader.onerror = function() {
+                        console.error('文件读取失败');
+                        alert('文件读取失败！');
+                        resetAvatarUpload();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    console.log('没有选择文件');
+                    resetAvatarUpload();
+                }
+            });
+            
+            // 保存头像
+            saveAvatarBtn.addEventListener('click', async function(e) {
+                const file = avatarFileInput.files[0];
+                if (!file) {
+                    alert('请先选择图片文件！');
+                    return;
+                }
+                
+                console.log('开始上传头像，文件:', file.name, '大小:', file.size);
+                
+                try {
+                    // 显示上传中状态
+                    saveAvatarBtn.disabled = true;
+                    saveAvatarBtn.textContent = '上传中...';
+                    cancelAvatarBtn.disabled = true;
+                    
+                    // 等待Supabase初始化完成
+                    console.log('检查Supabase初始化状态...');
+                    if (window.userDataManagerReady) {
+                        console.log('等待userDataManagerReady完成...');
+                        await window.userDataManagerReady;
+                        console.log('userDataManagerReady已完成');
+                    }
+                    
+                    // 等待userDataManager可用
+                    console.log('检查userDataManager是否可用...');
+                    let retryCount = 0;
+                    while (!window.userDataManager && retryCount < 50) {
+                        console.log(`等待userDataManager可用... (${retryCount}/50)`);
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        retryCount++;
+                    }
+                    
+                    if (!window.userDataManager) {
+                        throw new Error('无法连接到服务器，请检查网络连接');
+                    }
+                    
+                    // 检查用户登录状态
+                    if (!window.userDataManager.currentUser) {
+                        throw new Error('请先登录后再上传头像');
+                    }
+                    
+                    // 上传头像到Supabase存储
+                    console.log('使用Supabase上传头像');
+                    const result = await window.userDataManager.uploadAvatar(file);
+                    console.log('上传结果:', result);
+                    
+                    if (result && result.success) {
+                        // 更新头像显示
+                        avatar.src = result.url;
+                        
+                        // 重置上传表单
+                        resetAvatarUpload();
+                        
+                        // 保存到localStorage作为缓存
+                        localStorage.setItem('userAvatar', result.url);
+                        
+                        // 更新排行榜头像显示（如果存在）
+                        const leaderboardAvatar = document.querySelector(`[data-user-avatar="${window.userDataManager.currentUser.id}"]`);
+                        if (leaderboardAvatar) {
+                            leaderboardAvatar.src = result.url;
+                        }
+                        
+                        alert('头像上传成功！');
+                    } else {
+                        const errorMsg = result?.error || '未知错误';
+                        console.error('头像上传失败:', errorMsg);
+                        alert('头像上传失败：' + errorMsg);
+                    }
+                } catch (error) {
+                    console.error('头像上传错误:', error);
+                    alert('头像上传失败：' + (error.message || '请重试'));
+                } finally {
+                    // 恢复按钮状态
+                    saveAvatarBtn.disabled = false;
+                    saveAvatarBtn.textContent = '保存头像';
+                    cancelAvatarBtn.disabled = false;
+                }
+            });
+            
+            // 取消上传
+            cancelAvatarBtn.addEventListener('click', function(e) {
+                resetAvatarUpload();
+            });
+            
+            // 加载用户头像
+            async function loadUserAvatar() {
+                try {
+                    // 等待Supabase脚本加载完成
+                    let retryCount = 0;
+                    while (!window.userDataManager && retryCount < 50) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        retryCount++;
+                    }
+                    
+                    // 如果Supabase用户管理器存在，先等待其初始化完成，确保会话可用
+                    if (window.userDataManagerReady) {
+                        try {
+                            await window.userDataManagerReady;
+                            console.log('Supabase初始化完成，用户:', window.userDataManager?.currentUser?.email || '未登录');
+                        } catch (e) {
+                            console.warn('用户数据管理器初始化失败，使用本地头像或默认头像:', e);
+                        }
+                    } else if (window.userDataManager) {
+                        // 如果userDataManagerReady不存在，但userDataManager存在，尝试手动初始化
+                        if (!window.userDataManager.initialized) {
+                            await window.userDataManager.initialize();
+                        }
+                    }
+                
+                    // 先从localStorage获取缓存的头像
+                    const cachedAvatar = localStorage.getItem('userAvatar');
+                    if (cachedAvatar) {
+                        avatar.src = cachedAvatar;
+                        return;
+                    }
+                    
+                    // 如果Supabase可用，从数据库获取
+                    if (window.userDataManager) {
+                        const profile = await window.userDataManager.getUserProfile();
+                        if (profile && profile.avatar_url) {
+                            avatar.src = profile.avatar_url;
+                            localStorage.setItem('userAvatar', profile.avatar_url);
+                            return;
+                        }
+                    }
+                    
+                    // 使用默认头像
+                    avatar.src = '../assets/images/avatar-default.svg';
+                } catch (error) {
+            console.error('加载用户头像失败:', error);
+            avatar.src = '../assets/images/avatar-default.svg';
+                }
+            }
+            
+            // 重置上传表单
+            function resetAvatarUpload() {
+                avatarFileInput.value = '';
+                avatarPreview.style.display = 'none';
+                avatarUploadActions.style.display = 'none';
+                avatarUploadContainer.classList.remove('active');
+                avatarPreview.src = '';
+                saveAvatarBtn.disabled = false;
+                saveAvatarBtn.textContent = '保存头像';
+                cancelAvatarBtn.disabled = false;
+            }
+        });
+        
+        // 背景音乐控制
+        document.addEventListener('DOMContentLoaded', function() {
+            const bgMusic = document.getElementById('bgMusic');
+            const volumeIcon = document.getElementById('volumeIcon');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeValue = document.getElementById('volumeValue');
+            const volumeControl = document.getElementById('volumeControl');
+            const volumePresets = document.querySelectorAll('.volume-preset-btn');
+            
+            // 从localStorage读取音量状态，如果没有则使用默认值70%
+            let currentVolume = parseInt(localStorage.getItem('bgmVolume')) || 70;
+            let savedVolume = parseInt(localStorage.getItem('bgmSavedVolume')) || 70;
+            let isMusicPlaying = false;
+            
+            // 设置初始音量和UI
+            bgMusic.volume = currentVolume / 100;
+            volumeSlider.value = currentVolume;
+            volumeValue.textContent = currentVolume + "%";
+            updateVolumeIcon();
+            updateSliderBackground();
+            
+            // 检查并保存音频状态到localStorage
+            function saveAudioState() {
+                localStorage.setItem('bgmVolume', currentVolume);
+                localStorage.setItem('bgmSavedVolume', savedVolume);
+                localStorage.setItem('bgmIsPlaying', !bgMusic.paused);
+                if (!bgMusic.paused) {
+                    localStorage.setItem('bgmCurrentTime', bgMusic.currentTime);
+                }
+            }
+            
+            // 从localStorage恢复音频状态
+            function restoreAudioState() {
+                const savedIsPlaying = localStorage.getItem('bgmIsPlaying');
+                const savedCurrentTime = localStorage.getItem('bgmCurrentTime');
+                
+                if (savedIsPlaying === 'true' && savedCurrentTime) {
+                    bgMusic.currentTime = parseFloat(savedCurrentTime);
+                    bgMusic.play().then(() => {
+                        isMusicPlaying = true;
+                        console.log('背景音乐从上次位置继续播放');
+                    }).catch(error => {
+                        console.log('背景音乐播放失败:', error);
+                    });
+                }
+            }
+            
+            // 页面卸载时保存状态
+            window.addEventListener('beforeunload', saveAudioState);
+
+            // 页面卸载时清除自动更新
+            window.addEventListener('beforeunload', () => {
+                if (autoUpdateInterval) {
+                    clearInterval(autoUpdateInterval);
+                }
+            });
+
+            // 页面加载时恢复状态
+            restoreAudioState();
+            
+            // 点击页面任意位置开始播放音乐（解决浏览器自动播放限制）
+            document.addEventListener('click', function initMusic() {
+                if (!isMusicPlaying) {
+                    bgMusic.play().then(() => {
+                        isMusicPlaying = true;
+                        console.log('背景音乐开始播放');
+                    }).catch(error => {
+                        console.log('背景音乐播放失败:', error);
+                    });
+                    
+                    // 移除事件监听器
+                    document.removeEventListener('click', initMusic);
+                }
+            }, { once: true });
+            
+            // 音量图标点击事件
+            volumeIcon.addEventListener('click', function() {
+                if (currentVolume > 0) {
+                    // 保存当前音量并静音
+                    savedVolume = currentVolume;
+                    currentVolume = 0;
+                    volumeSlider.value = 0;
+                    volumeValue.textContent = "0%";
+                    updateVolumeIcon("🔇");
+                    volumeControl.classList.add("muted");
+                } else {
+                    // 恢复之前的音量
+                    currentVolume = savedVolume || 70;
+                    volumeSlider.value = currentVolume;
+                    volumeValue.textContent = currentVolume + "%";
+                    updateVolumeIcon();
+                    volumeControl.classList.remove("muted");
+                }
+                bgMusic.volume = currentVolume / 100;
+                saveAudioState();
+            });
+            
+            // 音量滑块变化事件
+            volumeSlider.addEventListener('input', function() {
+                currentVolume = parseInt(this.value);
+                volumeValue.textContent = currentVolume + "%";
+                bgMusic.volume = currentVolume / 100;
+                updateVolumeIcon();
+                
+                // 如果用户从静音状态调整音量，自动取消静音
+                if (currentVolume > 0 && volumeControl.classList.contains("muted")) {
+                    volumeControl.classList.remove("muted");
+                }
+                
+                // 保存状态并更新滑块背景
+                saveAudioState();
+                updateSliderBackground();
+            });
+            
+            // 音量预设按钮点击事件
+            volumePresets.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const presetVolume = parseInt(this.dataset.volume);
+                    currentVolume = presetVolume;
+                    volumeSlider.value = currentVolume;
+                    volumeValue.textContent = currentVolume + "%";
+                    updateVolumeIcon();
+                    bgMusic.volume = currentVolume / 100;
+                    
+                    // 如果设置了音量，取消静音状态
+                    if (currentVolume > 0 && volumeControl.classList.contains("muted")) {
+                        volumeControl.classList.remove("muted");
+                    }
+                    
+                    // 保存状态
+                    savedVolume = currentVolume;
+                    saveAudioState();
+                    
+                    // 添加点击反馈动画
+                    this.classList.add("active");
+                    setTimeout(() => {
+                        this.classList.remove("active");
+                    }, 200);
+                });
+            });
+            
+            // 更新音量图标
+            function updateVolumeIcon(customIcon) {
+                if (customIcon) {
+                    volumeIcon.textContent = customIcon;
+                    return;
+                }
+                
+                if (currentVolume == 0) {
+                    volumeIcon.textContent = "🔇";
+                } else if (currentVolume < 30) {
+                    volumeIcon.textContent = "🔈";
+                } else if (currentVolume < 70) {
+                    volumeIcon.textContent = "🔉";
+                } else {
+                    volumeIcon.textContent = "🔊";
+                }
+                
+                // 更新滑块的背景渐变，反映当前音量位置
+                updateSliderBackground();
+            }
+            
+            // 更新滑块背景渐变
+            function updateSliderBackground() {
+                const percentage = currentVolume;
+                const color1 = percentage < 30 ? '#ff5252' : percentage < 70 ? '#ffeb3b' : '#4caf50';
+                const color2 = percentage < 30 ? '#ffeb3b' : percentage < 70 ? '#4caf50' : '#2e7d32';
+                volumeSlider.style.background = `linear-gradient(to right, ${color1} 0%, ${color1} ${percentage}%, rgba(255,255,255,0.2) ${percentage}%, rgba(255,255,255,0.2) 100%)`;
+            }
+            
+            // 初始化滑块背景
+            updateSliderBackground();
+        });
+    </script>
+</body>
+</html>

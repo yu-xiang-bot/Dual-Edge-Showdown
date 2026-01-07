@@ -1,0 +1,28 @@
+<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="avatarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff3366;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#33ccff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 背景圆 -->
+  <circle cx="64" cy="64" r="60" fill="#1a1a2e" stroke="url(#avatarGradient)" stroke-width="3"/>
+  
+  <!-- 剑 -->
+  <path d="M64 20 L68 28 L72 36 L64 40 L56 36 L60 28 Z" fill="#ffcc00" stroke="#ff9900" stroke-width="1"/>
+  <rect x="62" y="36" width="4" height="40" fill="#cccccc"/>
+  <rect x="58" y="70" width="12" height="8" rx="2" fill="#999999"/>
+  
+  <!-- 盾 -->
+  <ellipse cx="90" cy="50" rx="15" ry="20" fill="#33ccff" stroke="#2299cc" stroke-width="1"/>
+  <path d="M85 45 L90 40 L95 45 L95 55 L90 60 L85 55 Z" fill="#ffffff" opacity="0.7"/>
+  
+  <!-- 魔法符号 -->
+  <circle cx="38" cy="50" r="12" fill="#ff3366" stroke="#ff0033" stroke-width="1"/>
+  <circle cx="38" cy="50" r="8" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.7"/>
+  <circle cx="38" cy="50" r="4" fill="#ffffff"/>
+  
+  <!-- 文字 -->
+  <text x="64" y="100" font-family="Arial, sans-serif" font-size="10" fill="#ffffff" text-anchor="middle">双锋对决</text>
+</svg>

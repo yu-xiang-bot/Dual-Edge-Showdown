@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>双锋对决</title>
+        <link rel = "stylesheet" href = "../styles/new.css"/>
+        <link rel = "icon" href = "../favicon.ico" type = "image/x-icon" />
+        <script src="../scripts/jquery.min.js"></script>
+
+        <script>
+            // 检查jQuery是否加载成功
+            if (typeof $ !== 'undefined') {
+                console.log('jQuery is loaded successfully');
+            } else {
+                console.error('jQuery is not loaded');
+            }
+        </script>
+        <!-- Supabase客户端库 -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+        <!-- Supabase数据库连接 -->
+        <script src="../scripts/supabase.js"></script>
+        <!-- 游戏时长追踪器 -->
+        <script src="../scripts/playtime-tracker.js"></script>
+        <!-- 游戏数据管理器 -->
+        <script src="../scripts/game-data-manager.js"></script>
+        <!-- 游戏数据集成 -->
+        <script src="../scripts/game-integration.js"></script>
+    </head>
+    <body>
+        <div class = "map">
+            <div id="artBox">
+                <div id="leftHouse"></div>
+                <div id="rightHouse"></div>
+                <div id="rightHousePlatform"></div>
+                <div id="back"></div>
+            </div>
+            <div class = "man one"></div>
+            <div class = "man two"></div>
+            <div class = "line oo"></div>
+            <div class = "line tt"></div>
+            <div class = "meteor"></div>
+            <div class = "shielding"></div>
+            <div class = "ground bottom"></div>
+            <div class = "ground left"></div>
+            <div class = "ground right"></div>
+            <div class = "sign Ma"></div>
+            <div class = "sign Me"></div>
+            <div id="bulletBox"></div>
+            <div id="speedTip"></div>
+            <div id="bloodBox">
+                <div></div>
+            </div>
+            <div class = "medical kit"></div>
+            <div class = "medical bottle"></div>
+            <div id="aiBox"></div>
+            <div id="fireBox"></div>
+            <div class = "gg">
+                <p class = "winner"></p>
+                <video id="mageWinVideo" class="win-video" autoplay loop muted>
+                    <source src="../assets/images/mageVictory.mp4" type="video/mp4">
+                </video>
+                <video id="mechanicianWinVideo" class="win-video" autoplay loop muted>
+                    <source src="../assets/images/mechanician.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class = "start">Round 1</div>
+        <div class = "round-info">
+            <span class="round-number">第 1/3 回合</span> | 
+            <span class="map-name">请选择地图</span>
+        </div>
+        </div>
+        
+        <div class = "health B1">
+            <div class = "H1 h10"></div>
+            <div class = "H1 shield"></div>
+            <div class = "H1 h11"></div>
+        </div>
+        <div class = "health B2">
+            <div class = "H2 h20"></div>
+            <div class = "H2 h21"></div>
+        </div>
+
+        <div class = "energy Mag">
+            <div class = "En1 enLine"></div>
+        </div>
+        <div class = "energy Mech">
+            <div class = "En2 enLine"></div>
+        </div>
+        
+        <!-- 法师技能显示区域（图标 + 环形进度条 + 倒计时） -->
+        <div class="skills-panel mage-skills">
+            <!-- X - 法力凝聚 -->
+            <div class="skill-cooldown" data-skill="mana">
+                <div class="skill-icon"></div>
+                <div class="cooldown-ring"></div>
+                <span class="countdown-text"></span>
+                <div class="skill-key">X</div>
+            </div>
+            <!-- B - 魔焰射线 -->
+            <div class="skill-cooldown" data-skill="fire">
+                <div class="skill-icon"></div>
+                <div class="cooldown-ring"></div>
+                <span class="countdown-text"></span>
+                <div class="skill-key">B</div>
+            </div>
+            <!-- C - 魔障 -->
+            <div class="skill-cooldown" data-skill="shield">
+                <div class="skill-icon"></div>
+                <div class="cooldown-ring"></div>
+                <span class="countdown-text"></span>
+                <div class="skill-key">C</div>
+            </div>
+            <!-- V - 炎爆术 -->
+            <div class="skill-cooldown" data-skill="meteor">
+                <div class="skill-icon"></div>
+                <div class="cooldown-ring"></div>
+                <span class="countdown-text"></span>
+                <div class="skill-key">V</div>
+            </div>
+            <!-- Q - 替身(大招) -->
+            <div class="skill-cooldown ultimate" data-skill="servant">
+                <div class="skill-icon"></div>
+                <div class="cooldown-ring"></div>
+                <span class="countdown-text">未就绪</span>
+                <div class="skill-key">Q</div>
+            </div>
+        </div>
+        
+        <!-- 机械师技能显示区域（图标 + 环形进度条 + 倒计时） -->
+        <div class="skills-panel mech-skills">
+            <!-- M - 血祭 -->
+            <div class="skill-cooldown" data-skill="blood">
+                <div class="skill-icon"></div>
+                <div class="cooldown-ring"></div>
+                <span class="countdown-text"></span>
+                <div class="skill-key">M</div>
+            </div>
+            <!-- / - 射击 -->
+            <div class="skill-cooldown" data-skill="shoot">
+                <div class="skill-icon"></div>
+                <div class="cooldown-ring"></div>
+                <span class="countdown-text"></span>
+                <div class="skill-key">/</div>
+            </div>
+            <!-- , - 突进 -->
+            <div class="skill-cooldown" data-skill="dash">
+                <div class="skill-icon"></div>
+                <div class="cooldown-ring"></div>
+                <span class="countdown-text"></span>
+                <div class="skill-key">,</div>
+            </div>
+            <!-- . - 微型核弹 -->
+            <div class="skill-cooldown" data-skill="nuke">
+                <div class="skill-icon"></div>
+                <div class="cooldown-ring"></div>
+                <span class="countdown-text"></span>
+                <div class="skill-key">.</div>
+            </div>
+            <!-- L - 恐怖机器人(大招) -->
+            <div class="skill-cooldown ultimate" data-skill="machine">
+                <div class="skill-icon"></div>
+                <div class="cooldown-ring"></div>
+                <span class="countdown-text">未就绪</span>
+                <div class="skill-key">L</div>
+            </div>
+        </div>
+        <div id = "sound">
+            <audio class = "MageAudio">
+                <source src="../assets/sounds/characters/mage/fireAtk.mp3" type="audio/mpeg" /><!--0-->
+            </audio>
+            <audio class = "MageAudio">
+                <source src="../assets/sounds/characters/mage/fireboom.mp3" type="audio/mpeg" /><!--1-->
+            </audio>
+            <audio class = "MageAudio">
+                <source src="../assets/sounds/characters/mage/mage.ah1.mp3" type="audio/mpeg" /><!--2-->
+            </audio>
+            <audio class = "MageAudio">
+                <source src="../assets/sounds/characters/mage/mage.ah2.mp3" type="audio/mpeg" /><!--3-->
+            </audio>
+            <audio class = "MageAudio">
+                <source src="../assets/sounds/characters/mage/mage.ah3.mp3" type="audio/mpeg" /><!--4-->
+            </audio>
+            <audio class = "MageAudio">
+                <source src="../assets/sounds/characters/mage/mageDie.mp3" type="audio/mpeg" /><!--5-->
+            </audio>
+            <audio class = "MageAudio">
+                <source src="../assets/sounds/characters/mage/mageWin.mp3" type="audio/mpeg" /><!--6-->
+            </audio>
+            <audio class = "MageAudio">
+                <source src="../assets/sounds/characters/mage/servant.die.mp3" type="audio/mpeg" /><!--7-->
+            </audio>
+            <audio class = "MageAudio">
+                <source src="../assets/sounds/characters/mage/servant.say.mp3" type="audio/mpeg" /><!--8-->
+            </audio>
+            <audio class = "MageAudio">
+                <source src="../assets/sounds/characters/mage/yes.my.mp3" type="audio/mpeg" /><!--9-->
+            </audio>
+            <audio class = "MageAudio">
+                <source src="../assets/sounds/characters/mage/tinyfire.mp3" type="audio/mpeg" /><!--10-->
+            </audio>
+            <audio class = "MageAudio">
+                <source src="../assets/sounds/characters/mage/stop.mp3" type="audio/mpeg" /><!--11-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/boom.mp3" type="audio/mpeg" /><!--0-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/crazy.mp3" type="audio/mpeg" /><!--1-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/drone.mp3" type="audio/mpeg" /><!--2-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/droneboom.mp3" type="audio/mpeg" /><!--3-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/flash.mp3" type="audio/mpeg" /><!--4-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/grenade.mp3" type="audio/mpeg" /><!--5-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/mechDie.mp3" type="audio/mpeg" /><!--6-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/mechhurt1.mp3" type="audio/mpeg" /><!--7-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/mechhurt2.mp3" type="audio/mpeg" /><!--8-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/mechhurt3.mp3" type="audio/mpeg" /><!--9-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/mechWin.mp3" type="audio/mpeg" /><!--10-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/reload.mp3" type="audio/mpeg" /><!--11-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/reloadFast.mp3" type="audio/mpeg" /><!--12-->
+            </audio>
+            <audio class = "MechAudio">
+                <source src="../assets/sounds/characters/mech/walk.mp3" type="audio/mpeg" /><!--13-->
+            </audio>
+            <audio class = "healAudio">
+                <source src="../assets/sounds/effects/heal.mp3" type="audio/mpeg" />
+            </audio>
+            <audio class = "roundAudio">
+                <source src="../assets/sounds/effects/round1.mp3" type="audio/mpeg" />
+            </audio>
+            <audio class = "roundAudio">
+                <source src="../assets/sounds/effects/round2.mp3" type="audio/mpeg" />
+            </audio>
+            <audio class = "roundAudio">
+                <source src="../assets/sounds/effects/round3.mp3" type="audio/mpeg" />
+            </audio>
+            <audio class = "roundAudio">
+                <source src="../assets/sounds/effects/fight.mp3" type="audio/mpeg" />
+             </audio>
+            <audio class = "roundAudio">
+                <source src="../assets/sounds/effects/fight.mp3" type="audio/mpeg" />
+              </audio>
+            <audio class = "roundAudio">
+                <source src="../assets/sounds/effects/fight.mp3" type="audio/mpeg" />
+               </audio>
+            <audio class = "roundAudio">
+                <source src="../assets/sounds/effects/fight.mp3" type="audio/mpeg" />
+               </audio>
+            <audio class = "BGM" loop>
+                <source src="../assets/sounds/bgm/BGM1.mp3" type="audio/mpeg" />
+              </audio>
+            <audio class = "BGM" loop>
+                <source src="../assets/sounds/bgm/BGM6.mp3" type="audio/mpeg" />
+               </audio>
+            <audio class = "BGM" loop>
+                <source src="../assets/sounds/bgm/BGM2.mp3" type="audio/mpeg" />
+               </audio>
+            <audio class = "BGM" loop>
+                <source src="../assets/sounds/bgm/BGM3.mp3" type="audio/mpeg" />
+                </audio>
+            <audio class = "BGM" loop>
+                <source src="../assets/sounds/bgm/BGM4.mp3" type="audio/mpeg" />
+                </audio>
+            <audio class = "BGM" loop>
+                <source src="../assets/sounds/bgm/BGM5.mp3" type="audio/mpeg" />
+                </audio>
+            <!-- 主页面背景音频 -->
+            <audio id="mainMenuBGM" loop preload="auto">
+                <source src="../assets/sounds/effects/mainMusic.mp3" type="audio/mpeg" />
+             </audio>
+        </div>
+
+        
+        
+
+        
+        <!-- 游戏主界面 -->
+        <div class="game-main-menu" id="gameMainMenu">
+
+            <!-- 动态背景视频 -->
+            <video id="backgroundVideo" autoplay muted loop>
+                <source src="../assets/images/mainImage.mp4" type="video/mp4">
+                您的浏览器不支持视频播放。
+            </video>
+            <div class="main-menu-content">
+                <div class="main-menu-header">
+                    <img src="../assets/images/logo.png" alt="双锋对决" class="game-logo">
+                    <p>三局两胜制对决</p>
+                </div>
+                <div class="main-menu-body">
+                    <button class="main-menu-button primary" id="mapSelectionBtn">选择地图</button>
+                    <button class="main-menu-button secondary" id="leaderboardBtn">排行榜</button>
+                    <button class="main-menu-button secondary" id="userInfoBtn">个人信息</button>
+                    <button class="main-menu-button secondary" id="helpBtnFromMain">游戏帮助</button>
+                    <button class="main-menu-button secondary" id="backToLoginBtn">返回登录</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class = "map-selection" id="mapSelection">
+            <div class="map-selection-content">
+                <div class="map-selection-header">
+                    <h2>选择地图</h2>
+                    <p>选择一个地图进行三局两胜的对决</p>
+                </div>
+                <div class="map-selection-body">
+                    <div class="map-grid">
+                        <div class="map-item" data-map="0">
+                            <div class="map-preview" style="background-image: url(../assets/images/backgrounds/background1.png)"></div>
+                            <div class="map-name">城镇广场</div>
+                        </div>
+                        <div class="map-item" data-map="1">
+                            <div class="map-preview" style="background-image: url(../assets/images/backgrounds/background2.png)"></div>
+                            <div class="map-name">峭壁之战</div>
+                        </div>
+                        <div class="map-item" data-map="2">
+                            <div class="map-preview" style="background-image: url(../assets/images/backgrounds/background3.png)"></div>
+                            <div class="map-name">地下矿井</div>
+                        </div>
+                        <div class="map-item" data-map="3">
+                            <div class="map-preview" style="background-image: url(../assets/images/backgrounds/background4.png)"></div>
+                            <div class="map-name">天空之城</div>
+                        </div>
+                        <div class="map-item" data-map="4">
+                            <div class="map-preview" style="background-image: url(../assets/images/backgrounds/background5.png)"></div>
+                            <div class="map-name">火山熔岩</div>
+                        </div>
+                        <div class="map-item" data-map="5">
+                            <div class="map-preview" style="background-image: url(../assets/images/backgrounds/background6.png)"></div>
+                            <div class="map-name">冰雪要塞</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="map-selection-footer">
+                    <button class="main-menu-button secondary" id="backFromMapSelectionBtn">返回主菜单</button>
+                </div>
+            </div>
+        </div>
+        
+
+        
+
+        
+        <!-- 返回按钮 -->
+        <div class="exit-button" id="backButton">返回</div>
+        
+        <!-- 音量控制组件 -->
+        <div class="volume-control">
+            <div class="volume-icon" id="volumeIcon">🔊</div>
+            <input type="range" id="volumeSlider" min="0" max="100" value="70" class="volume-slider">
+            <div class="volume-value" id="volumeValue">70%</div>
+        </div>
+        
+        <!-- 等待房间界面 -->
+        <div class="waiting-room" id="waitingRoom" style="display: none;">
+            <div class="waiting-content">
+                <h2>等待对手加入</h2>
+                <div class="room-code-display">
+                    <p>房间代码</p>
+                    <div class="code-display" id="waitingRoomId">------</div>
+                </div>
+                <div class="waiting-animation">
+                    <div class="loading-spinner"></div>
+                    <p id="waitingMessage">等待玩家加入房间...</p>
+                </div>
+                <div class="waiting-actions">
+                    <button class="primary-button" id="waitingRoomStartGameBtn" style="display: none;">开始游戏</button>
+                    <button class="secondary-button" id="cancelWaitingBtn">取消等待</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 加载页面 -->
+        <div class="loading-page" id="loadingPage">
+            <!-- 加载页面视频背景 -->
+            <video id="loadingBackgroundVideo" autoplay muted loop>
+                <source src="../assets/images/mainImage.mp4" type="video/mp4">
+                您的浏览器不支持视频播放。
+            </video>
+            <div class="loading-content">
+                <div class="loading-text">正在加载游戏...</div>
+                <div class="loading-bar-container">
+                    <div class="loading-bar" id="loadingBar"></div>
+                </div>
+                <div class="loading-percentage" id="loadingPercentage">0%</div>
+            </div>
+        </div>
+
+        <script>
+            // 全局音量控制变量（与control.js同步）
+            let globalVolume = 70;
+            let isSoundEnabled = true;
+
+            // 加载自定义技能图标
+            function loadCustomSkillIcons() {
+                const skillIcons = {
+                    'mana': '../assets/images/icons/mana.png',
+                    'fire': '../assets/images/icons/fire.png',
+                    'shield': '../assets/images/icons/shield.png',
+                    'meteor': '../assets/images/icons/meteor.png',
+                    'servant': '../assets/images/icons/servant.png',
+                    'blood': '../assets/images/icons/blood.png',
+                    'shoot': '../assets/images/icons/shoot.png',
+                    'dash': '../assets/images/icons/dash.png',
+                    'nuke': '../assets/images/icons/nuke.png',
+                    'machine': '../assets/images/icons/machine.png'
+                };
+
+                document.querySelectorAll('.skill-cooldown').forEach(skill => {
+                    const skillName = skill.dataset.skill;
+                    const iconPath = skillIcons[skillName];
+                    const skillIcon = skill.querySelector('.skill-icon');
+
+                    if (iconPath && skillIcon) {
+                        // 尝试加载自定义图标
+                        fetch(iconPath)
+                            .then(response => {
+                                if (response.ok) {
+                                    // 图标存在，使用自定义图标
+                                    skillIcon.style.backgroundImage = `url('${iconPath}')`;
+                                    skillIcon.style.backgroundSize = 'contain';
+                                    skillIcon.style.backgroundPosition = 'center';
+                                    skillIcon.style.backgroundRepeat = 'no-repeat';
+                                } else {
+                                    throw new Error('图标不存在');
+                                }
+                            })
+                            .catch(error => {
+                                // 图标加载失败，使用默认SVG图案
+                                console.log(`图标 ${iconPath} 不存在，使用默认SVG`);
+                            });
+                    }
+                });
+            }
+
+            // 页面加载完成后尝试加载自定义图标
+            document.addEventListener('DOMContentLoaded', loadCustomSkillIcons);
+
+            // 按钮处理函数
+            function handleMapSelection() {
+                console.log('选择地图按钮通过onclick被点击');
+                const gameMainMenu = document.getElementById('gameMainMenu');
+                const mapSelection = document.getElementById('mapSelection');
+                if (gameMainMenu && mapSelection) {
+                    gameMainMenu.style.display = 'none';
+                    mapSelection.style.display = 'block';
+                }
+            }
+            
+            function handleLeaderboard() {
+                console.log('排行榜按钮通过onclick被点击');
+                window.location.href = './leaderboard.html';
+            }
+
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // 返回按钮 - 统一返回到游戏主菜单
+                const backBtn = document.getElementById('backButton');
+                if (backBtn) {
+                    backBtn.addEventListener('click', function(e) {
+                        console.log('返回按钮被点击，返回到游戏主菜单');
+                        window.location.href = './game.html';  // 返回到游戏主菜单页面
+                    });
+                } else {
+                    console.error('返回按钮元素未找到');
+                }
+
+                // 音量控制功能（简化版，主要控制由control.js处理）
+                const volumeIcon = document.getElementById('volumeIcon');
+                const volumeSlider = document.getElementById('volumeSlider');
+                const volumeValue = document.getElementById('volumeValue');
+
+                // 更新音量显示
+                function updateVolumeDisplay() {
+                    if (volumeValue) {
+                        volumeValue.textContent = globalVolume + '%';
+                    }
+                    if (volumeIcon) {
+                        if (globalVolume == 0) {
+                            volumeIcon.textContent = '🔇';
+                        } else if (globalVolume < 30) {
+                            volumeIcon.textContent = '🔈';
+                        } else if (globalVolume < 70) {
+                            volumeIcon.textContent = '🔉';
+                        } else {
+                            volumeIcon.textContent = '🔊';
+                        }
+                    }
+                }
+
+                // 初始化音量显示
+                updateVolumeDisplay();
+
+                // 监听control.js中的音量变化
+                window.addEventListener('volumeChanged', function(e) {
+                    globalVolume = e.detail.volume;
+                    isSoundEnabled = e.detail.enabled;
+                    if (volumeSlider) {
+                        volumeSlider.value = globalVolume;
+                    }
+                    updateVolumeDisplay();
+                });
+            });
+        </script>
+        <script src ="../scripts/control.js"></script>
+
+    </body>
+</html>

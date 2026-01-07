@@ -1,0 +1,438 @@
+/* 联机功能样式 */
+
+/* 在线对战界面 */
+.online-battle {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1003;
+    overflow: auto;
+}
+
+.online-battle-content {
+    background: linear-gradient(135deg, #252525, #1a1a1a);
+    margin: 5% auto;
+    padding: 0;
+    border: 2px solid #444;
+    border-radius: 15px;
+    width: 600px;
+    max-width: 90%;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+}
+
+.online-battle-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px 30px;
+    background: linear-gradient(90deg, #3a2020, #1f1f1f);
+    color: #e0e0e0;
+    border-bottom: 2px solid #444;
+}
+
+.online-battle-header h2 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.online-battle-header p {
+    margin: 10px 0 0 0;
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+/* 选项卡样式 */
+.online-battle-tabs {
+    display: flex;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #333;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 15px 20px;
+    background: #333;
+    color: #ccc;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active {
+    background: #222;
+    color: #fff;
+    border-bottom: 3px solid #cc0000;
+}
+
+.tab-button:hover {
+    background: #444;
+    color: #fff;
+}
+
+.tab-content {
+    display: none;
+    padding: 30px;
+    overflow: auto;
+    max-height: 400px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* 表单样式 */
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #e0e0e0;
+    font-weight: 600;
+}
+
+.form-input {
+    width: 100%;
+    padding: 15px;
+    background: #222;
+    border: 2px solid #444;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 18px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #cc0000;
+    box-shadow: 0 0 10px rgba(204, 0, 0, 0.3);
+}
+
+.primary-button, .secondary-button {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-right: 15px;
+    margin-bottom: 15px;
+}
+
+.primary-button {
+    background: linear-gradient(135deg, #cc0000, #880000);
+    color: white;
+    box-shadow: 0 4px 12px rgba(204, 0, 0, 0.4);
+}
+
+.primary-button:hover {
+    background: linear-gradient(135deg, #ff0000, #aa0000);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(204, 0, 0, 0.5);
+}
+
+.secondary-button {
+    background: linear-gradient(135deg, #444444, #222222);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.secondary-button:hover {
+    background: linear-gradient(135deg, #666666, #333333);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.primary-button:active, .secondary-button:active {
+    transform: translateY(-1px);
+}
+
+/* 房间信息样式 */
+.room-info {
+    color: #ccc;
+    font-size: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.room-id-display {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.room-id-display h3 {
+    color: #e0e0e0;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.room-id {
+    font-family: 'Courier New', monospace;
+    font-size: 36px;
+    font-weight: bold;
+    color: #fff;
+    background: #222;
+    padding: 15px 25px;
+    border-radius: 8px;
+    letter-spacing: 5px;
+    margin: 15px auto;
+    display: inline-block;
+    box-shadow: 0 0 10px rgba(204, 0, 0, 0.3);
+    border: 2px solid #444;
+}
+
+.room-id-info {
+    color: #ccc;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.room-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.waiting-status {
+    text-align: center;
+    padding: 20px;
+    background: rgba(204, 0, 0, 0.1);
+    border-radius: 8px;
+    border: 1px solid #cc0000;
+}
+
+.waiting-status p {
+    margin: 0;
+    color: #fff;
+    font-size: 18px;
+    animation: pulse-text 2s infinite;
+}
+
+@keyframes pulse-text {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+/* 房间列表样式 */
+.rooms-list {
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.room-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.room-item:hover {
+    background: rgba(204, 0, 0, 0.1);
+}
+
+.room-item:last-child {
+    border-bottom: none;
+}
+
+.room-id-text {
+    font-family: 'Courier New', monospace;
+    font-size: 20px;
+    font-weight: bold;
+    color: #cc0000;
+}
+
+.room-status {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.room-status.waiting {
+    background: rgba(0, 128, 0, 0.3);
+    color: #00ff00;
+}
+
+.room-status.ready {
+    background: rgba(255, 165, 0, 0.3);
+    color: #ffaa00;
+}
+
+.room-status.playing {
+    background: rgba(0, 0, 255, 0.3);
+    color: #0080ff;
+}
+
+.no-rooms {
+    text-align: center;
+    color: #ccc;
+    font-style: italic;
+    padding: 30px 0;
+}
+
+/* 等待房间界面 */
+.waiting-room {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1004;
+    overflow: auto;
+}
+
+.waiting-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+    color: #fff;
+}
+
+.waiting-content h2 {
+    font-size: 36px;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(204, 0, 0, 0.5);
+}
+
+.room-code-display {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.room-code-display p {
+    font-size: 18px;
+    margin-bottom: 15px;
+    opacity: 0.8;
+}
+
+.code-display {
+    font-family: 'Courier New', monospace;
+    font-size: 48px;
+    font-weight: bold;
+    color: #fff;
+    background: #222;
+    padding: 20px 30px;
+    border-radius: 10px;
+    letter-spacing: 8px;
+    margin: 0 auto;
+    display: inline-block;
+    box-shadow: 0 0 20px rgba(204, 0, 0, 0.5);
+    border: 2px solid #444;
+    text-transform: uppercase;
+}
+
+.waiting-animation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid #333;
+    border-top: 5px solid #cc0000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.waiting-message {
+    font-size: 18px;
+    color: #fff;
+    text-align: center;
+}
+
+.waiting-actions {
+    margin-top: 20px;
+}
+
+.back-button-container {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.back-button {
+    background: linear-gradient(135deg, #444444, #222222);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.back-button:hover {
+    background: linear-gradient(135deg, #666666, #333333);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .online-battle-content {
+        width: 95%;
+        margin: 10px auto;
+    }
+    
+    .room-id {
+        font-size: 28px;
+        padding: 10px 20px;
+    }
+    
+    .code-display {
+        font-size: 36px;
+        padding: 15px 25px;
+    }
+    
+    .tab-button {
+        padding: 12px 15px;
+        font-size: 16px;
+    }
+    
+    .primary-button, .secondary-button {
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+}

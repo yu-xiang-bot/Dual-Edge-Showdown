@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联机诊断工具 - Dual Showdown</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff6b6b;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .section h2 {
+            color: #4ecdc4;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .status-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: rgba(0,0,0,0.2);
+            border-radius: 5px;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .status-item.success {
+            border-left-color: #2ecc71;
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .status-item.error {
+            border-left-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .status-item.warning {
+            border-left-color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+        }
+
+        .status-item.info {
+            border-left-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .button {
+            padding: 12px 24px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            background: #ee5a5a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button.secondary {
+            background: #4ecdc4;
+        }
+
+        .button.secondary:hover {
+            background: #45b7aa;
+        }
+
+        .log-container {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .log-entry.error {
+            color: #ff6b6b;
+        }
+
+        .log-entry.success {
+            color: #2ecc71;
+        }
+
+        .log-entry.warning {
+            color: #f39c12;
+        }
+
+        .log-entry.info {
+            color: #3498db;
+        }
+
+        .test-result {
+            margin: 10px 0;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+
+        .test-result .title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .test-result .details {
+            font-size: 0.9em;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .solution-box {
+            background: rgba(46, 204, 113, 0.1);
+            border: 2px solid #2ecc71;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .solution-box h3 {
+            color: #2ecc71;
+            margin-bottom: 10px;
+        }
+
+        .solution-box ol {
+            margin-left: 20px;
+        }
+
+        .solution-box li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            border: 1px solid #444;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #2d2d2d;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 联机对战诊断工具</h1>
+
+        <!-- 诊断控制面板 -->
+        <div class="section">
+            <h2>📋 诊断控制</h2>
+            <button class="button" onclick="runFullDiagnosis()">🔍 开始全面诊断</button>
+            <button class="button secondary" onclick="clearLogs()">🧹 清除日志</button>
+            <button class="button secondary" onclick="exportReport()">📊 导出报告</button>
+        </div>
+
+        <!-- 诊断进度 -->
+        <div class="section">
+            <h2>📊 诊断进度</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%">0%</div>
+            </div>
+            <div id="progressStatus">等待开始...</div>
+        </div>
+
+        <!-- 诊断结果 -->
+        <div class="section">
+            <h2>✅ 诊断结果</h2>
+            <div id="diagnosisResults">
+                <div class="status-item info">请点击"开始全面诊断"按钮开始检测</div>
+            </div>
+        </div>
+
+        <!-- 详细日志 -->
+        <div class="section">
+            <h2>📝 详细日志</h2>
+            <div class="log-container" id="logContainer">
+                <div class="log-entry info">[系统] 诊断工具已就绪</div>
+            </div>
+        </div>
+
+        <!-- 解决方案 -->
+        <div class="section">
+            <h2>💡 常见问题解决方案</h2>
+
+            <div class="solution-box">
+                <h3>问题1：访客无法加入房间（guest_id未更新）</h3>
+                <p><strong>症状：</strong>房主显示"等待对手加入"，但访客输入房间ID后无法成功加入。</p>
+                <p><strong>原因：</strong>数据库权限策略限制了访客更新房间的权限。</p>
+                <h4>解决步骤：</h4>
+                <ol>
+                    <li>登录 Supabase 控制台</li>
+                    <li>进入 SQL 编辑器</li>
+                    <li>执行以下 SQL 脚本：</li>
+                </ol>
+                <div class="code-block">
+-- 删除旧的策略
+DROP POLICY IF EXISTS "Users can join rooms" ON public.game_rooms;
+
+-- 创建新的策略 - 允许任何用户加入 waiting 状态的房间
+CREATE POLICY "Users can join waiting rooms" ON public.game_rooms
+FOR UPDATE
+USING (
+  auth.uid() = guest_id OR
+  auth.uid() = host_id OR
+  status = 'waiting'
+)
+WITH CHECK (
+  auth.uid() = guest_id OR
+  auth.uid() = host_id OR
+  (
+    status = 'ready' AND
+    guest_id = auth.uid()
+  )
+);
+                </div>
+                <ol start="4">
+                    <li>点击"Run"执行脚本</li>
+                    <li>返回游戏页面，重新创建房间并测试</li>
+                </ol>
+            </div>
+
+            <div class="solution-box">
+                <h3>问题2：实时订阅失败</h3>
+                <p><strong>症状：</strong>访客成功加入房间，但房主侧没有显示"开始游戏"按钮。</p>
+                <p><strong>原因：</strong>Supabase 实时订阅可能因为网络或配置问题失败。</p>
+                <h4>解决步骤：</h4>
+                <ol>
+                    <li>检查浏览器控制台是否有订阅错误</li>
+                    <li>确保网络连接正常</li>
+                    <li>如果问题持续，刷新页面后重新创建房间</li>
+                    <li>检查 Supabase 项目的 Realtime 功能是否已启用</li>
+                </ol>
+            </div>
+
+            <div class="solution-box">
+                <h3>问题3：房间状态轮询失败</h3>
+                <p><strong>症状：</strong>房间状态检查轮询没有正常工作。</p>
+                <p><strong>原因：</strong>可能是代码逻辑错误或网络延迟。</p>
+                <h4>解决步骤：</h4>
+                <ol>
+                    <li>检查浏览器控制台的日志输出</li>
+                    <li>确认房间 ID 格式正确（6位大写字母数字）</li>
+                    <li>清除浏览器缓存后重新尝试</li>
+                    <li>使用不同的浏览器进行测试</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载 Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // 配置
+        const SUPABASE_URL = 'https://vlturfwdcjlrsoswkzvr.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsdHVyZndkY2pscnNvc3drenZyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIyMjA2MiwiZXhwIjoyMDgxNzk4MDYyfQ.fZNNS_1n7HI4r9IaIydfaewXbvzwVonG8I8EGlTvqqc';
+
+        let supabaseClient = null;
+        let testResults = [];
+        let currentStep = 0;
+        let totalSteps = 8;
+
+        // 初始化日志
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // 清除日志
+        function clearLogs() {
+            document.getElementById('logContainer').innerHTML = '';
+            addLog('日志已清除', 'info');
+        }
+
+        // 更新进度
+        function updateProgress(step, status) {
+            const percentage = Math.round((step / totalSteps) * 100);
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressFill').textContent = percentage + '%';
+            document.getElementById('progressStatus').textContent = status;
+        }
+
+        // 添加诊断结果
+        function addResult(testName, passed, details, suggestions = '') {
+            const resultsContainer = document.getElementById('diagnosisResults');
+            const resultItem = document.createElement('div');
+            resultItem.className = `test-result ${passed ? 'success' : 'error'}`;
+
+            let html = `
+                <div class="title">${passed ? '✅' : '❌'} ${testName}</div>
+                <div class="details">${details}</div>
+            `;
+
+            if (suggestions && !passed) {
+                html += `<div style="color: #f39c12; margin-top: 8px;"><strong>💡 建议：</strong>${suggestions}</div>`;
+            }
+
+            resultItem.innerHTML = html;
+            resultsContainer.appendChild(resultItem);
+
+            testResults.push({
+                testName,
+                passed,
+                details,
+                suggestions
+            });
+        }
+
+        // 全面诊断
+        async function runFullDiagnosis() {
+            try {
+                // 重置
+                testResults = [];
+                document.getElementById('diagnosisResults').innerHTML = '';
+                addLog('开始全面诊断...', 'info');
+                currentStep = 0;
+
+                // 步骤1：初始化 Supabase
+                addLog('步骤 1/8: 初始化 Supabase 客户端...', 'info');
+                updateProgress(++currentStep, '初始化 Supabase...');
+                try {
+                    const { createClient } = supabase;
+                    supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    addLog('✓ Supabase 客户端初始化成功', 'success');
+                    addResult('Supabase 客户端初始化', true, 'Supabase SDK 加载成功，可以正常创建客户端');
+                } catch (error) {
+                    addLog('✗ Supabase 客户端初始化失败: ' + error.message, 'error');
+                    addResult('Supabase 客户端初始化', false, '错误: ' + error.message, '请检查网络连接或刷新页面重试');
+                    return;
+                }
+
+                // 步骤2：检查用户认证
+                addLog('步骤 2/8: 检查用户认证状态...', 'info');
+                updateProgress(++currentStep, '检查用户认证...');
+                try {
+                    const { data: { session }, error } = await supabaseClient.auth.getSession();
+                    if (error) throw error;
+
+                    if (session && session.user) {
+                        addLog(`✓ 用户已登录: ${session.user.email}`, 'success');
+                        addResult('用户认证状态', true, `用户已登录: ${session.user.email}`);
+                    } else {
+                        addLog('⚠ 用户未登录', 'warning');
+                        addResult('用户认证状态', false, '用户未登录，无法测试联机功能', '请先登录游戏页面，然后再运行诊断');
+                        return;
+                    }
+                } catch (error) {
+                    addLog('✗ 检查用户认证失败: ' + error.message, 'error');
+                    addResult('用户认证状态', false, '错误: ' + error.message);
+                    return;
+                }
+
+                // 步骤3：检查游戏房间表
+                addLog('步骤 3/8: 检查游戏房间表...', 'info');
+                updateProgress(++currentStep, '检查数据库表...');
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('game_rooms')
+                        .select('*')
+                        .limit(1);
+
+                    if (error) {
+                        if (error.code === '42P01') {
+                            addLog('✗ game_rooms 表不存在', 'error');
+                            addResult('游戏房间表', false, 'game_rooms 表不存在', '请运行 database/create_game_rooms.sql 脚本创建表');
+                        } else {
+                            throw error;
+                        }
+                    } else {
+                        addLog('✓ game_rooms 表存在', 'success');
+                        addResult('游戏房间表', true, 'game_rooms 表已创建');
+                    }
+                } catch (error) {
+                    addLog('✗ 检查表失败: ' + error.message, 'error');
+                    addResult('游戏房间表', false, '错误: ' + error.message);
+                    return;
+                }
+
+                // 步骤4：测试创建房间
+                addLog('步骤 4/8: 测试创建房间...', 'info');
+                updateProgress(++currentStep, '测试创建房间...');
+                const testRoomId = 'TEST' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                try {
+                    const { data: { user } } = await supabaseClient.auth.getUser();
+
+                    const { data, error } = await supabaseClient
+                        .from('game_rooms')
+                        .insert([
+                            {
+                                id: testRoomId,
+                                host_id: user.id,
+                                host_email: user.email,
+                                status: 'waiting'
+                            }
+                        ]);
+
+                    if (error) throw error;
+                    addLog(`✓ 测试房间创建成功: ${testRoomId}`, 'success');
+                    addResult('创建房间权限', true, '可以成功创建房间，INSERT 权限正常');
+                } catch (error) {
+                    addLog('✗ 创建房间失败: ' + error.message, 'error');
+                    addResult('创建房间权限', false, '错误: ' + error.message, '请检查"Users can create rooms"策略是否正确配置');
+                    return;
+                }
+
+                // 步骤5：测试读取房间
+                addLog('步骤 5/8: 测试读取房间...', 'info');
+                updateProgress(++currentStep, '测试读取房间...');
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('game_rooms')
+                        .select('*')
+                        .eq('id', testRoomId)
+                        .single();
+
+                    if (error) throw error;
+                    addLog('✓ 可以读取房间数据', 'success');
+                    addLog(`  房间信息: ID=${data.id}, 状态=${data.status}, 房主=${data.host_email}`, 'info');
+                    addResult('读取房间权限', true, 'SELECT 权限正常');
+                } catch (error) {
+                    addLog('✗ 读取房间失败: ' + error.message, 'error');
+                    addResult('读取房间权限', false, '错误: ' + error.message);
+                }
+
+                // 步骤6：测试加入房间（关键步骤）
+                addLog('步骤 6/8: 测试加入房间（模拟访客）...', 'info');
+                updateProgress(++currentStep, '测试加入房间...');
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('game_rooms')
+                        .update({
+                            guest_id: testRoomId + 'GUEST', // 使用不同的ID模拟访客
+                            status: 'ready'
+                        })
+                        .eq('id', testRoomId);
+
+                    if (error) {
+                        addLog('✗ 更新房间失败: ' + error.message, 'error');
+                        addLog('  错误代码: ' + error.code, 'error');
+                        addLog('  错误详情: ' + JSON.stringify(error), 'error');
+                        addResult('访客加入房间权限', false, '错误: ' + error.message, '这是最常见的问题！请运行 database/fix_join_policy.sql 脚本修复权限策略');
+                    } else {
+                        addLog('✓ 可以更新房间（模拟访客加入）', 'success');
+                        addResult('访客加入房间权限', true, 'UPDATE 权限正常，访客可以成功加入房间');
+                    }
+                } catch (error) {
+                    addLog('✗ 加入房间测试失败: ' + error.message, 'error');
+                    addResult('访客加入房间权限', false, '错误: ' + error.message, '请运行 database/fix_join_policy.sql 脚本修复权限策略');
+                }
+
+                // 步骤7：测试实时订阅
+                addLog('步骤 7/8: 测试实时订阅...', 'info');
+                updateProgress(++currentStep, '测试实时订阅...');
+                try {
+                    const channel = supabaseClient
+                        .channel('test-channel')
+                        .on('postgres_changes',
+                            { event: '*', schema: 'public', table: 'game_rooms' },
+                            (payload) => {
+                                addLog('✓ 收到实时更新: ' + JSON.stringify(payload), 'success');
+                            }
+                        )
+                        .subscribe((status) => {
+                            if (status === 'SUBSCRIBED') {
+                                addLog('✓ 实时订阅成功', 'success');
+                                addResult('实时订阅功能', true, 'Realtime 功能正常工作');
+                            } else if (status === 'CHANNEL_ERROR') {
+                                addLog('✗ 实时订阅失败', 'error');
+                                addResult('实时订阅功能', false, '订阅状态: ' + status, '请检查 Supabase 项目的 Realtime 功能是否已启用');
+                            }
+                        });
+
+                    // 等待订阅完成
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    // 取消订阅
+                    supabaseClient.removeChannel(channel);
+                } catch (error) {
+                    addLog('✗ 实时订阅测试失败: ' + error.message, 'error');
+                    addResult('实时订阅功能', false, '错误: ' + error.message, '请检查 Supabase 项目的 Realtime 功能是否已启用');
+                }
+
+                // 步骤8：清理测试数据
+                addLog('步骤 8/8: 清理测试数据...', 'info');
+                updateProgress(++currentStep, '清理测试数据...');
+                try {
+                    const { error } = await supabaseClient
+                        .from('game_rooms')
+                        .delete()
+                        .eq('id', testRoomId);
+
+                    if (error) {
+                        addLog('⚠ 清理测试数据失败: ' + error.message, 'warning');
+                        addLog('  请手动删除测试房间: ' + testRoomId, 'warning');
+                    } else {
+                        addLog('✓ 测试数据已清理', 'success');
+                    }
+                } catch (error) {
+                    addLog('⚠ 清理测试数据失败: ' + error.message, 'warning');
+                }
+
+                // 完成
+                updateProgress(totalSteps, '诊断完成！');
+                addLog('========== 诊断完成 ==========', 'success');
+
+                const passedTests = testResults.filter(r => r.passed).length;
+                const failedTests = testResults.length - passedTests;
+
+                addLog(`总计: ${testResults.length} 项测试`, 'info');
+                addLog(`通过: ${passedTests} 项`, failedTests === 0 ? 'success' : 'warning');
+                addLog(`失败: ${failedTests} 项`, failedTests > 0 ? 'error' : 'info');
+
+                if (failedTests > 0) {
+                    addLog('', 'info');
+                    addLog('⚠ 检测到问题，请查看上方的"诊断结果"和"常见问题解决方案"部分', 'warning');
+                } else {
+                    addLog('', 'info');
+                    addLog('🎉 所有检测项都通过了！联机功能应该可以正常工作。', 'success');
+                }
+
+            } catch (error) {
+                addLog('✗ 诊断过程出错: ' + error.message, 'error');
+                addLog('错误堆栈: ' + error.stack, 'error');
+            }
+        }
+
+        // 导出报告
+        function exportReport() {
+            const report = {
+                timestamp: new Date().toISOString(),
+                testResults: testResults,
+                summary: {
+                    total: testResults.length,
+                    passed: testResults.filter(r => r.passed).length,
+                    failed: testResults.filter(r => !r.passed).length
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dual-showdown-diagnosis-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            addLog('诊断报告已导出', 'success');
+        }
+
+        // 页面加载完成后自动提示
+        window.addEventListener('load', function() {
+            addLog('诊断工具加载完成', 'success');
+            addLog('点击"开始全面诊断"按钮开始检测', 'info');
+        });
+    </script>
+</body>
+</html>

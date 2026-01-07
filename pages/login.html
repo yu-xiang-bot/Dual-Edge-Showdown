@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双锋对决 - 登录</title>
+    <link rel = "icon" href = "../favicon.ico" type = "image/x-icon" />
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #000;
+            background-image: url('../assets/images/cover.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: 'Kalam', cursive;
+        }
+        
+        .login-container {
+            background: rgba(255, 51, 102, 0.1);
+            backdrop-filter: blur(5px);
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            padding: 2.5rem;
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 51, 102, 0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+            transform: rotate(-1deg);
+            animation: float 6s ease-in-out infinite;
+            overflow: hidden;
+        }
+        
+        .login-container::before {
+            content: "";
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            transform: rotate(2deg);
+            z-index: -1;
+        }
+        
+        .login-container::after {
+            content: "⚔️ 战斗登录 ⚔️";
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            transform: rotate(10deg);
+        }
+        
+        @keyframes float {
+            0% { transform: rotate(-1deg) translateY(0px); box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 51, 102, 0.1); }
+            50% { transform: rotate(1deg) translateY(-10px); box-shadow: 0 0 40px rgba(255, 51, 102, 0.3), inset 0 0 20px rgba(255, 51, 102, 0.2); }
+            100% { transform: rotate(-1deg) translateY(0px); box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 51, 102, 0.1); }
+        }
+        
+        .game-logo {
+            width: 80%;
+            max-width: 300px;
+            height: auto;
+            margin-bottom: 1.5rem;
+            transform: rotate(-2deg);
+            filter: drop-shadow(0 0 10px rgba(255, 51, 102, 0.7));
+            animation: pulse 2s infinite alternate;
+            position: relative;
+        }
+        
+        .game-logo::after {
+            content: "";
+            position: absolute;
+            width: 110%;
+            height: 8px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10"><path d="M0,5 Q25,10 50,5 T100,5" stroke="%2333ccff" fill="none" stroke-width="3" stroke-linecap="round" /></svg>') center/100% no-repeat;
+            bottom: -15px;
+            left: -5%;
+        }
+        
+        @keyframes pulse {
+            0% { transform: rotate(-2deg) scale(1); filter: drop-shadow(0 0 10px rgba(255, 51, 102, 0.7)); }
+            100% { transform: rotate(2deg) scale(1.05); filter: drop-shadow(0 0 15px rgba(255, 51, 102, 0.9)); }
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+            text-align: left;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 1px 1px 0px #ff3366;
+            font-size: 1.1rem;
+            position: relative;
+            transform: rotate(-1deg);
+        }
+        
+        .form-group label::before {
+            content: "⚡";
+            position: absolute;
+            left: -15px;
+            color: #ffcc00;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px 5px 15px 5px / 5px 15px 5px 15px;
+            font-size: 1.1rem;
+            box-sizing: border-box;
+            color: #fff;
+            transition: all 0.3s ease;
+            font-family: 'Kalam', cursive;
+            position: relative;
+            transform: rotate(0.5deg);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #ff3366;
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: rotate(0deg) scale(1.02);
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.3);
+        }
+        
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+        
+        .form-group:nth-child(even) input {
+            border-radius: 5px 15px 5px 15px / 15px 5px 15px 5px;
+            transform: rotate(-0.5deg);
+        }
+        
+        .form-group:nth-child(even) input:focus {
+            transform: rotate(0deg) scale(1.02);
+        }
+        
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 0.9rem 1.5rem;
+            border: 2px solid #fff;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            flex: 1;
+            margin: 0 0.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-family: 'Kalam', cursive;
+            position: relative;
+            overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: rotate(-1deg);
+            z-index: 1;
+        }
+        
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            border-color: #ff3366;
+            color: #fff;
+            border-radius: 50% 20% / 20% 50%;
+            box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: rotate(0deg) scale(1.05);
+            box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+            background-color: rgba(255, 51, 102, 0.3);
+        }
+        
+        .btn-secondary {
+            border-color: #33ccff;
+            color: #fff;
+            border-radius: 20% 50% / 50% 20%;
+            transform: rotate(1deg);
+            box-shadow: -5px 5px 0px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            transform: rotate(0deg) scale(1.05);
+            box-shadow: -3px 3px 0px rgba(0, 0, 0, 0.3);
+            background-color: rgba(51, 204, 255, 0.3);
+        }
+        
+        #guestMode .btn {
+            border-color: #ffcc00;
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            transform: rotate(-2deg);
+            box-shadow: 5px -5px 0px rgba(0, 0, 0, 0.3);
+        }
+        
+        #guestMode .btn:hover {
+            transform: rotate(0deg) scale(1.05);
+            box-shadow: 3px -3px 0px rgba(0, 0, 0, 0.3);
+            background-color: rgba(255, 204, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn::after {
+            content: "";
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+        
+        .form-switch {
+            margin-top: 2rem;
+            text-align: center;
+            transform: rotate(1deg);
+        }
+        
+        .form-switch a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            text-shadow: 2px 2px 0px #ff3366;
+            transition: all 0.3s ease;
+            position: relative;
+            display: inline-block;
+            padding: 5px 10px;
+            border: 2px dashed transparent;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20% 80% 30% 70% / 30% 30% 70% 70%;
+        }
+        
+        .form-switch a:hover {
+            transform: rotate(-2deg) scale(1.05);
+            text-shadow: 2px 2px 0px #33ccff;
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .message {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 20% 80% 30% 70% / 30% 30% 70% 70%;
+            display: none;
+            position: relative;
+            border: 2px dashed;
+            font-family: 'Kalam', cursive;
+            font-weight: 700;
+            transform: rotate(-1deg);
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+        
+        .message.error {
+            background-color: rgba(255, 51, 102, 0.2);
+            color: #fff;
+            border-color: #ff3366;
+            text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+        }
+        
+        .message.success {
+            background-color: rgba(51, 204, 0, 0.2);
+            color: #fff;
+            border-color: #33cc00;
+            text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+        }
+        
+        .message::before {
+            content: "✎";
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+        }
+        
+        #guestMode {
+            margin-top: 2rem;
+            transform: rotate(1deg);
+        }
+        
+        .guest-info {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 0.5rem;
+            font-style: italic;
+            position: relative;
+        }
+        
+        .guest-info::before {
+            content: "~";
+            position: absolute;
+            left: -15px;
+            animation: blink 2s infinite;
+        }
+        
+        .guest-info::after {
+            content: "~";
+            position: absolute;
+            right: -15px;
+            animation: blink 2s infinite;
+        }
+        
+        /* 添加一些装饰元素 */
+        .doodle {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.4;
+            z-index: -1;
+        }
+        
+        .doodle-1 {
+            top: 20px;
+            left: 20px;
+            transform: rotate(-20deg);
+            animation: float 8s ease-in-out infinite;
+            color: #ff3366;
+        }
+        
+        .doodle-2 {
+            bottom: 20px;
+            right: 20px;
+            transform: rotate(15deg);
+            animation: float 10s ease-in-out infinite;
+            color: #ffcc00;
+        }
+        
+        .doodle-3 {
+            top: 50%;
+            right: 10px;
+            transform: rotate(30deg);
+            animation: float 7s ease-in-out infinite;
+            color: #33ccff;
+        }
+        
+        /* 添加战斗风格的背景装饰 */
+        .login-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                transparent 48%, 
+                rgba(255, 51, 102, 0.1) 50%, 
+                transparent 52%), 
+                linear-gradient(-45deg, 
+                transparent 48%, 
+                rgba(255, 204, 0, 0.1) 50%, 
+                transparent 52%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 音量控制样式 - 与游戏页面一致 */
+        .volume-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(30, 30, 40, 0.85), rgba(20, 20, 30, 0.9));
+            border-radius: 30px;
+            padding: 8px 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .volume-control:hover {
+            background: linear-gradient(135deg, rgba(40, 40, 50, 0.95), rgba(30, 30, 40, 0.95));
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .volume-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-icon:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: scale(1.1);
+        }
+
+        .volume-icon:active {
+            transform: scale(0.95);
+        }
+
+        .volume-slider-container {
+            display: flex;
+            align-items: center;
+            margin-left: 12px;
+            opacity: 0;
+            max-width: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .volume-control:hover .volume-slider-container {
+            opacity: 1;
+            max-width: 180px;
+            margin-left: 12px;
+        }
+
+        .volume-slider {
+            width: 120px;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #ff5252 0%, #ff5252 30%, #ffeb3b 30%, #ffeb3b 70%, #4caf50 70%, #4caf50 100%);
+            outline: none;
+            border-radius: 3px;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider:hover::-webkit-slider-thumb {
+            transform: scale(1.2);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider:hover::-moz-range-thumb {
+            transform: scale(1.2);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-value {
+            margin-left: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            min-width: 40px;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 添加音量预设按钮 */
+        .volume-presets {
+            display: flex;
+            margin-left: 10px;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .volume-control:hover .volume-presets {
+            opacity: 1;
+        }
+
+        .volume-preset-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .volume-preset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .volume-preset-btn:active {
+            transform: scale(0.95);
+        }
+
+        .volume-preset-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.15);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* 为静音状态添加特殊样式 */
+        .volume-control.muted .volume-icon {
+            color: #ff5252;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .volume-control {
+                top: 15px;
+                right: 15px;
+                padding: 6px 12px;
+            }
+
+            .volume-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 18px;
+            }
+
+            .volume-slider {
+                width: 90px;
+            }
+
+            .volume-value {
+                font-size: 12px;
+                min-width: 35px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="doodle doodle-1">⚔️</div>
+        <div class="doodle doodle-2">🔥</div>
+        <div class="doodle doodle-3">⚡</div>
+        <img src="../assets/images/logo.png" alt="双锋对决" class="game-logo">
+        
+        <div id="loginForm">
+            <div class="form-group">
+                <label for="email">邮箱</label>
+                <input type="email" id="email" placeholder="请输入您的邮箱" required>
+            </div>
+
+            <div class="form-group" id="verifyCodeGroup" style="display: none;">
+                <label for="verifyCode">验证码</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="verifyCode" placeholder="请输入验证码" maxlength="6" style="flex: 1;">
+                    <button id="sendCodeBtn" class="btn btn-secondary" style="flex: 0 0 auto; padding: 0.7rem 1rem; font-size: 0.9rem;">发送验证码</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" placeholder="请输入您的密码" required>
+            </div>
+
+            <div id="usernameGroup" class="form-group" style="display: none;">
+                <label for="username">用户名</label>
+                <input type="text" id="username" placeholder="请输入您的用户名">
+            </div>
+            
+            <div class="form-buttons">
+                <button id="loginBtn" class="btn btn-primary">登录</button>
+                <button id="toggleFormBtn" class="btn btn-secondary">注册</button>
+            </div>
+            
+            <!-- 游客模式暂时关闭 -->
+            <div id="guestMode" style="display: none;">
+                <button id="guestBtn" class="btn btn-primary">游客模式</button>
+                <p class="guest-info">游客模式下游戏数据不会被保存</p>
+            </div>
+        </div>
+        
+        <div id="message" class="message"></div>
+    </div>
+    
+    <!-- 背景音乐 -->
+    <audio id="bgMusic" loop>
+        <source src="../assets/sounds/effects/mainMusic.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- 音量控制 -->
+    <div class="volume-control" id="volumeControl">
+        <div class="volume-icon" id="volumeIcon">🔊</div>
+        <div class="volume-slider-container" id="volumeSliderContainer">
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+            <div class="volume-value" id="volumeValue">70%</div>
+            <div class="volume-presets">
+                <button class="volume-preset-btn" data-volume="0">0</button>
+                <button class="volume-preset-btn" data-volume="25">25</button>
+                <button class="volume-preset-btn" data-volume="50">50</button>
+                <button class="volume-preset-btn" data-volume="75">75</button>
+                <button class="volume-preset-btn" data-volume="100">100</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Supabase客户端库 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script>
+        // Supabase配置
+        const SUPABASE_URL = 'https://vlturfwdcjlrsoswkzvr.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsdHVyZndkY2pscnNvc3drenZyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIyMjA2MiwiZXhwIjoyMDgxNzk4MDYyfQ.fZNNS_1n7HI4r9IaIydfaewXbvzwVonG8I8EGlTvqqc';
+        
+        // 初始化Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // DOM元素
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const usernameInput = document.getElementById('username');
+        const usernameGroup = document.getElementById('usernameGroup');
+        const verifyCodeGroup = document.getElementById('verifyCodeGroup');
+        const verifyCodeInput = document.getElementById('verifyCode');
+        const sendCodeBtn = document.getElementById('sendCodeBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const toggleFormBtn = document.getElementById('toggleFormBtn');
+        const guestBtn = document.getElementById('guestBtn');
+        const messageDiv = document.getElementById('message');
+
+        // 表单状态：true表示登录表单，false表示注册表单
+        let isLoginForm = true;
+        let verificationCode = null;
+        let countdownTimer = null;
+        
+        // 显示消息
+        function showMessage(message, isError = false) {
+            messageDiv.textContent = message;
+            messageDiv.className = `message ${isError ? 'error' : 'success'}`;
+            messageDiv.style.display = 'block';
+            
+            // 5秒后自动隐藏消息
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // 切换表单
+        function toggleForm() {
+            isLoginForm = !isLoginForm;
+
+            if (isLoginForm) {
+                loginBtn.textContent = '登录';
+                toggleFormBtn.textContent = '注册';
+                usernameGroup.style.display = 'none';
+                verifyCodeGroup.style.display = 'none';
+            } else {
+                loginBtn.textContent = '注册';
+                toggleFormBtn.textContent = '登录';
+                usernameGroup.style.display = 'block';
+                verifyCodeGroup.style.display = 'block';
+            }
+
+            // 清空输入
+            emailInput.value = '';
+            passwordInput.value = '';
+            usernameInput.value = '';
+            verifyCodeInput.value = '';
+            verificationCode = null;
+            messageDiv.style.display = 'none';
+
+            // 清除倒计时
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+                sendCodeBtn.disabled = false;
+                sendCodeBtn.textContent = '发送验证码';
+            }
+        }
+        
+        // 登录功能
+        async function signIn() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showMessage('请填写邮箱和密码', true);
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                // 登录成功，保存用户信息到localStorage
+                localStorage.setItem('user', JSON.stringify(data.user));
+                // 清除游客模式标记，确保使用登录账号
+                localStorage.removeItem('guestMode');
+                showMessage('登录成功！');
+
+                // 触发自定义事件，开始游戏时长追踪
+                window.dispatchEvent(new CustomEvent('userLoggedIn', {
+                    detail: { user: data.user }
+                }));
+
+                // 跳转到游戏页面
+                setTimeout(() => {
+                    window.location.href = 'game.html';
+                }, 1000);
+
+            } catch (error) {
+                showMessage(`登录失败: ${error.message}`, true);
+            }
+        }
+        
+        // 发送验证码
+        async function sendVerificationCode() {
+            const email = emailInput.value.trim();
+
+            if (!email) {
+                showMessage('请先输入邮箱', true);
+                return;
+            }
+
+            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                showMessage('请输入有效的邮箱地址', true);
+                return;
+            }
+
+            try {
+                sendCodeBtn.disabled = true;
+                sendCodeBtn.textContent = '发送中...';
+
+                // 调用后端API发送验证码
+                const response = await fetch('http://localhost:5000/api/send-verification-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage(result.message, false);
+                    console.log(`验证码已发送到 ${email}`);
+
+                    // 开始60秒倒计时
+                    let countdown = 60;
+                    countdownTimer = setInterval(() => {
+                        countdown--;
+                        sendCodeBtn.textContent = `${countdown}秒后重发`;
+
+                        if (countdown <= 0) {
+                            clearInterval(countdownTimer);
+                            countdownTimer = null;
+                            sendCodeBtn.disabled = false;
+                            sendCodeBtn.textContent = '发送验证码';
+                            verificationCode = null;
+                        }
+                    }, 1000);
+                } else {
+                    throw new Error(result.error || '发送失败');
+                }
+            } catch (error) {
+                showMessage(`发送验证码失败: ${error.message}`, true);
+                sendCodeBtn.disabled = false;
+                sendCodeBtn.textContent = '发送验证码';
+            }
+        }
+
+        // 注册功能
+        async function signUp() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const username = usernameInput.value.trim();
+            const code = verifyCodeInput.value.trim();
+
+            if (!email || !password || !username) {
+                showMessage('请填写所有字段', true);
+                return;
+            }
+
+            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                showMessage('请输入有效的邮箱地址', true);
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('密码长度至少为6位', true);
+                return;
+            }
+
+            if (!code || code.length !== 6) {
+                showMessage('请输入6位验证码', true);
+                return;
+            }
+
+            try {
+                // 先验证验证码
+                const verifyResponse = await fetch('http://localhost:5000/api/verify-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, code })
+                });
+
+                const verifyResult = await verifyResponse.json();
+
+                if (!verifyResult.success) {
+                    throw new Error(verifyResult.error || '验证码验证失败');
+                }
+
+                // 验证码正确，进行注册
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            username: username
+                        },
+                        emailRedirectTo: window.location.origin + '/pages/game.html'
+                    }
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                showMessage('注册成功！正在跳转...', false);
+
+                // 清除倒计时
+                if (countdownTimer) {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                }
+
+                // 注册成功后跳转到游戏页面
+                setTimeout(() => {
+                    window.location.href = 'game.html';
+                }, 2000);
+
+            } catch (error) {
+                showMessage(`注册失败: ${error.message}`, true);
+            }
+        }
+        
+        // 游客模式（暂时关闭）
+        function guestMode() {
+            // 暂时禁用游客模式，强制要求登录
+            showMessage('游客模式暂时关闭，请先登录', true);
+            return;
+            
+            // 以下代码暂时不执行
+            // 保存游客模式标记
+            // localStorage.setItem('guestMode', 'true');
+            // showMessage('以游客模式进入游戏');
+            // 
+            // // 跳转到游戏页面
+            // setTimeout(() => {
+            //     window.location.href = 'game.html';
+            // }, 1000);
+        }
+        
+        // 事件监听
+        toggleFormBtn.addEventListener('click', toggleForm);
+        sendCodeBtn.addEventListener('click', sendVerificationCode);
+        loginBtn.addEventListener('click', () => {
+            if (isLoginForm) {
+                signIn();
+            } else {
+                signUp();
+            }
+        });
+        guestBtn.addEventListener('click', guestMode);
+        
+        // 按Enter键提交
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (isLoginForm) {
+                    signIn();
+                } else {
+                    signUp();
+                }
+            }
+        });
+
+        // 背景音乐控制
+        const bgMusic = document.getElementById('bgMusic');
+        const volumeIcon = document.getElementById('volumeIcon');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const volumeControl = document.getElementById('volumeControl');
+        const volumePresets = document.querySelectorAll('.volume-preset-btn');
+
+        // 从localStorage读取音量状态，如果没有则使用默认值70%
+        let currentVolume = parseInt(localStorage.getItem('bgmVolume')) || 70;
+        let savedVolume = parseInt(localStorage.getItem('bgmSavedVolume')) || 70;
+        let isMusicPlaying = false;
+
+        // 设置初始音量和UI
+        bgMusic.volume = currentVolume / 100;
+        volumeSlider.value = currentVolume;
+        volumeValue.textContent = currentVolume + "%";
+        updateVolumeIcon();
+        updateSliderBackground();
+
+        // 检查并保存音频状态到localStorage
+        function saveAudioState() {
+            localStorage.setItem('bgmVolume', currentVolume);
+            localStorage.setItem('bgmSavedVolume', savedVolume);
+            localStorage.setItem('bgmIsPlaying', !bgMusic.paused);
+            if (!bgMusic.paused) {
+                localStorage.setItem('bgmCurrentTime', bgMusic.currentTime);
+            }
+        }
+
+        // 从localStorage恢复音频状态
+        function restoreAudioState() {
+            const savedIsPlaying = localStorage.getItem('bgmIsPlaying');
+            const savedCurrentTime = localStorage.getItem('bgmCurrentTime');
+
+            if (savedIsPlaying === 'true' && savedCurrentTime) {
+                bgMusic.currentTime = parseFloat(savedCurrentTime);
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    console.log('背景音乐从上次位置继续播放');
+                }).catch(error => {
+                    console.log('背景音乐播放失败:', error);
+                });
+            }
+        }
+
+        // 页面卸载时保存状态
+        window.addEventListener('beforeunload', saveAudioState);
+
+        // 页面加载时恢复状态
+        restoreAudioState();
+
+        // 点击页面任意位置开始播放音乐（解决浏览器自动播放限制）
+        document.addEventListener('click', function initMusic() {
+            if (!isMusicPlaying) {
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    console.log('背景音乐开始播放');
+                }).catch(error => {
+                    console.log('背景音乐播放失败:', error);
+                });
+
+                // 移除事件监听器
+                document.removeEventListener('click', initMusic);
+            }
+        }, { once: true });
+
+        // 音量图标点击事件
+        volumeIcon.addEventListener('click', function() {
+            if (currentVolume > 0) {
+                // 保存当前音量并静音
+                savedVolume = currentVolume;
+                currentVolume = 0;
+                volumeSlider.value = 0;
+                volumeValue.textContent = "0%";
+                updateVolumeIcon("🔇");
+                volumeControl.classList.add("muted");
+            } else {
+                // 恢复之前的音量
+                currentVolume = savedVolume || 70;
+                volumeSlider.value = currentVolume;
+                volumeValue.textContent = currentVolume + "%";
+                updateVolumeIcon();
+                volumeControl.classList.remove("muted");
+            }
+            bgMusic.volume = currentVolume / 100;
+            saveAudioState();
+        });
+
+        // 音量滑块变化事件
+        volumeSlider.addEventListener('input', function() {
+            currentVolume = parseInt(this.value);
+            volumeValue.textContent = currentVolume + "%";
+            bgMusic.volume = currentVolume / 100;
+            updateVolumeIcon();
+
+            // 如果用户从静音状态调整音量，自动取消静音
+            if (currentVolume > 0 && volumeControl.classList.contains("muted")) {
+                volumeControl.classList.remove("muted");
+            }
+
+            // 保存状态并更新滑块背景
+            saveAudioState();
+            updateSliderBackground();
+        });
+
+        // 音量预设按钮点击事件
+        volumePresets.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const presetVolume = parseInt(this.dataset.volume);
+                currentVolume = presetVolume;
+                volumeSlider.value = currentVolume;
+                volumeValue.textContent = currentVolume + "%";
+                updateVolumeIcon();
+                bgMusic.volume = currentVolume / 100;
+
+                // 如果设置了音量，取消静音状态
+                if (currentVolume > 0 && volumeControl.classList.contains("muted")) {
+                    volumeControl.classList.remove("muted");
+                }
+
+                // 保存状态
+                savedVolume = currentVolume;
+                saveAudioState();
+
+                // 添加点击反馈动画
+                this.classList.add("active");
+                setTimeout(() => {
+                    this.classList.remove("active");
+                }, 200);
+            });
+        });
+
+        // 更新音量图标
+        function updateVolumeIcon(customIcon) {
+            if (customIcon) {
+                volumeIcon.textContent = customIcon;
+                return;
+            }
+
+            if (currentVolume == 0) {
+                volumeIcon.textContent = "🔇";
+            } else if (currentVolume < 30) {
+                volumeIcon.textContent = "🔈";
+            } else if (currentVolume < 70) {
+                volumeIcon.textContent = "🔉";
+            } else {
+                volumeIcon.textContent = "🔊";
+            }
+
+            // 更新滑块的背景渐变，反映当前音量位置
+            updateSliderBackground();
+        }
+
+        // 更新滑块背景渐变
+        function updateSliderBackground() {
+            const percentage = currentVolume;
+            const color1 = percentage < 30 ? '#ff5252' : percentage < 70 ? '#ffeb3b' : '#4caf50';
+            const color2 = percentage < 30 ? '#ffeb3b' : percentage < 70 ? '#4caf50' : '#2e7d32';
+            volumeSlider.style.background = `linear-gradient(to right, ${color1} 0%, ${color1} ${percentage}%, rgba(255,255,255,0.2) ${percentage}%, rgba(255,255,255,0.2) 100%)`;
+        }
+
+        // 初始化滑块背景
+        updateSliderBackground();
+
+    </script>
+</body>
+</html>
