@@ -1465,12 +1465,11 @@ function game(){
    
     // 自适应缩放功能
     function resizeGame() {
-        var gameContainer = $('.game-container');
         var map = $('.map');
         
-        // 获取游戏容器和地图的尺寸
-        var containerWidth = gameContainer.width();
-        var containerHeight = gameContainer.height();
+        // 直接使用窗口尺寸作为容器尺寸，适配全屏模式
+        var containerWidth = $(window).width();
+        var containerHeight = $(window).height();
         var mapWidth = map.width();
         var mapHeight = map.height();
         
@@ -1485,6 +1484,9 @@ function game(){
     
     // 初始化缩放
     $(window).on('load resize', resizeGame);
+    
+    // 将resizeGame函数添加到全局窗口对象，以便从其他地方调用
+    window.resizeGame = resizeGame;
     
     energy();
     $gg.hide();
