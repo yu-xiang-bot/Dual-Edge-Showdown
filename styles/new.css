@@ -237,6 +237,7 @@ body{
 .line{
     height: 2px;
     width: 300px;
+    background-color: transparent;
 }
 
 .oo{
@@ -1766,18 +1767,18 @@ body{
 
 #rightHousePlatform{
     position: absolute;
-    right: 90px;        /* 保持原位置 */
-    width: 342px;        /* 左右各延长七分之一：300 + 300/7*2 ≈ 342px */
+    right: 50px;        /* 调整位置，更靠近右侧房屋 */
+    width: 400px;        /* 调整宽度，更符合房屋比例 */
     height: 20px;
 
-    /* 原来是 320，先下移到红线位置(260px)，现在再下移20px，使新挡板上边缘与原挡板下边缘对齐 */
+    /* 调整位置，使其融入右侧房屋结构 */
     bottom: 240px;
 
-    background-color: #000000;
-    border: 2px solid #333333;
+    background-color: transparent;
+    border: 2px solid transparent;
     border-radius: 3px;
     z-index: 5;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    box-shadow: none;
 }
 
 #artBox{

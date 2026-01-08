@@ -159,8 +159,7 @@ function integrateGameDataTracking() {
             $returnToLogin.off('click').on('click', function() {
                 // 清除登录状态
                 localStorage.removeItem('user');
-                localStorage.setItem('guestMode', 'false');
-                
+
                 // 跳转到登录页面
                 window.location.href = 'login.html';
             });
@@ -216,24 +215,11 @@ function integrateGameDataTracking() {
 
 // 页面加载时的初始化
 $(document).ready(function() {
-    // 检查是否是游客模式
-    const isGuestMode = localStorage.getItem('guestMode') === 'true';
-    
-    if (isGuestMode) {
-        // 显示游客模式提示
-        setTimeout(function() {
-            const $start = $('.start');
-            if ($start.length > 0) {
-                $start.append('<div style="font-size: 12px; color: #ccc;">(游客模式)</div>');
-            }
-        }, 1000);
-    } else {
-        // 检查用户是否已登录
-        const user = localStorage.getItem('user');
-        if (!user) {
-            // 如果未登录，重定向到登录页面
-            window.location.href = 'login.html';
-            return;
-        }
+    // 检查用户是否已登录
+    const user = localStorage.getItem('user');
+    if (!user) {
+        // 如果未登录，重定向到登录页面
+        window.location.href = 'login.html';
+        return;
     }
 });

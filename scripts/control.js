@@ -1018,7 +1018,7 @@ function game(){
         } else if(check.y == 450 && check.x >= 1430 && check.fallSpeed === 0 ){
             check.fallTrue = true;
             check.jumpChance = 1;
-        } else if(check.y == 240 && (check.x < 1058 || check.x > 1400)){
+        } else if(check.y == 240 && (check.x < 1050 || check.x > 1450)){
             // 如果玩家在挡板高度但x坐标超出挡板范围，则开始掉落
             check.fallTrue = true;
             check.jumpChance = 1;
@@ -1077,7 +1077,7 @@ function game(){
                     jump.jumpChance = 2;
                     jump.fallSpeed = 0;
                     jump.y = 450;
-                } else if(jump.y >= 240 && jump.y <= 270 && jump.x >= 1058 && jump.x <= 1400){
+                } else if(jump.y >= 240 && jump.y <= 270 && jump.x >= 1050 && jump.x <= 1450){
                     // 右侧挡板碰撞检测 - 修正后的范围
                     jump.fallTrue = false;
                     jump.jumpChance = 2;
@@ -1465,11 +1465,12 @@ function game(){
    
     // 自适应缩放功能
     function resizeGame() {
+        var gameContainer = $('.game-container');
         var map = $('.map');
         
-        // 直接使用窗口尺寸作为容器尺寸，适配全屏模式
-        var containerWidth = $(window).width();
-        var containerHeight = $(window).height();
+        // 获取游戏容器和地图的尺寸
+        var containerWidth = gameContainer.width();
+        var containerHeight = gameContainer.height();
         var mapWidth = map.width();
         var mapHeight = map.height();
         
@@ -1484,9 +1485,6 @@ function game(){
     
     // 初始化缩放
     $(window).on('load resize', resizeGame);
-    
-    // 将resizeGame函数添加到全局窗口对象，以便从其他地方调用
-    window.resizeGame = resizeGame;
     
     energy();
     $gg.hide();

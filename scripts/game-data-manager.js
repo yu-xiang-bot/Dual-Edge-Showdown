@@ -1,14 +1,6 @@
 // 游戏数据管理器 - 与Supabase数据库交互
 class GameDataManager {
     constructor() {
-        // 暂时禁用游客模式，强制要求登录
-        const guestModeValue = localStorage.getItem('guestMode');
-        // 如果guestMode为'true'，清除它并提示需要登录
-        if (guestModeValue === 'true') {
-            localStorage.removeItem('guestMode');
-            console.warn('游客模式已禁用，请先登录');
-        }
-        this.isGuestMode = false; // 强制设为false
         this.userData = null;
         this.gameSession = {
             startTime: Date.now(),
@@ -21,11 +13,6 @@ class GameDataManager {
 
     // 初始化游戏数据管理器
     async initialize() {
-        if (this.isGuestMode) {
-            console.log('游客模式：游戏数据不会被保存');
-            return true;
-        }
-
         // 等待Supabase客户端加载完成
         if (typeof window.supabase === 'undefined' || typeof window.userDataManager === 'undefined') {
             console.error('Supabase客户端未加载');
@@ -97,11 +84,6 @@ class GameDataManager {
         this.gameSession.outcome = outcome;
         this.gameSession.endTime = Date.now();
         this.gameSession.duration = Math.floor((this.gameSession.endTime - this.gameSession.startTime) / 1000);
-
-        if (this.isGuestMode) {
-            console.log('游客模式：游戏数据不保存');
-            return { success: true, message: '游戏结束（游客模式，数据未保存）' };
-        }
 
         try {
             // 更新用户统计数据
@@ -197,10 +179,6 @@ class GameDataManager {
 
     // 获取排行榜数据
     async getLeaderboard() {
-        if (this.isGuestMode) {
-            return { success: false, error: '游客模式下无法获取排行榜' };
-        }
-
         try {
             const result = await window.userDataManager.getLeaderboard();
             return result;
@@ -212,11 +190,6 @@ class GameDataManager {
 
     // 保存游戏设置
     async saveSettings(settings) {
-        if (this.isGuestMode) {
-            console.log('游客模式：设置不会保存');
-            return { success: true, message: '设置已更新（游客模式）' };
-        }
-
         try {
             // 合并新设置
             this.userData.settings = { ...this.userData.settings, ...settings };
@@ -237,21 +210,11 @@ class GameDataManager {
 
     // 获取用户统计数据
     getUserStatistics() {
-        if (this.isGuestMode) {
-            return null;
-        }
         return this.userData.statistics;
     }
 
     // 获取游戏设置
     getGameSettings() {
-        if (this.isGuestMode) {
-            return {
-                soundEnabled: true,
-                selectedCharacter: null,
-                unlockedLevels: [0, 1, 2, 3, 4, 5] // 游客模式下解锁所有关卡
-            };
-        }
         return this.userData.settings;
     }
 }

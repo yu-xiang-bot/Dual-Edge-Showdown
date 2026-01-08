@@ -123,6 +123,60 @@
             50% { opacity: 0.3; }
         }
         
+        .form-group input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .password-strength {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .password-strength.weak {
+            background-color: rgba(255, 82, 82, 0.2);
+            border: 1px solid rgba(255, 82, 82, 0.5);
+            color: #ff5252;
+        }
+
+        .password-strength.medium {
+            background-color: rgba(255, 235, 59, 0.2);
+            border: 1px solid rgba(255, 235, 59, 0.5);
+            color: #ffeb3b;
+        }
+
+        .password-strength.strong {
+            background-color: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            color: #4caf50;
+        }
+
         .form-group input {
             width: 100%;
             padding: 0.9rem;
@@ -615,17 +669,10 @@
                 <input type="email" id="email" placeholder="请输入您的邮箱" required>
             </div>
 
-            <div class="form-group" id="verifyCodeGroup" style="display: none;">
-                <label for="verifyCode">验证码</label>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="text" id="verifyCode" placeholder="请输入验证码" maxlength="6" style="flex: 1;">
-                    <button id="sendCodeBtn" class="btn btn-secondary" style="flex: 0 0 auto; padding: 0.7rem 1rem; font-size: 0.9rem;">发送验证码</button>
-                </div>
-            </div>
-
             <div class="form-group">
                 <label for="password">密码</label>
-                <input type="password" id="password" placeholder="请输入您的密码" required>
+                <input type="password" id="password" placeholder="请输入您的密码（至少6位）" required>
+                <div id="passwordStrength" class="password-strength" style="display: none;"></div>
             </div>
 
             <div id="usernameGroup" class="form-group" style="display: none;">
@@ -636,12 +683,6 @@
             <div class="form-buttons">
                 <button id="loginBtn" class="btn btn-primary">登录</button>
                 <button id="toggleFormBtn" class="btn btn-secondary">注册</button>
-            </div>
-            
-            <!-- 游客模式暂时关闭 -->
-            <div id="guestMode" style="display: none;">
-                <button id="guestBtn" class="btn btn-primary">游客模式</button>
-                <p class="guest-info">游客模式下游戏数据不会被保存</p>
             </div>
         </div>
         
@@ -672,32 +713,60 @@
 
     <!-- Supabase客户端库 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <!-- 引入全局Supabase配置 -->
+    <script src="../scripts/supabase.js"></script>
     <script>
-        // Supabase配置
-        const SUPABASE_URL = 'https://vlturfwdcjlrsoswkzvr.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsdHVyZndkY2pscnNvc3drenZyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIyMjA2MiwiZXhwIjoyMDgxNzk4MDYyfQ.fZNNS_1n7HI4r9IaIydfaewXbvzwVonG8I8EGlTvqqc';
+        // 使用全局初始化的Supabase客户端
+        // 确保在supabase.js加载完成后执行后续操作
         
-        // 初始化Supabase
-        const { createClient } = supabase;
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
+        // 检查URL参数，如果是邮箱验证成功后的回调
+        window.addEventListener('load', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const verified = urlParams.get('verified');
+
+            if (verified === 'true') {
+                // 尝试获取会话
+                const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+
+                if (session) {
+                    showMessage('✅ 邮箱验证成功！正在自动登录...', false);
+                    // 保存用户信息
+                    localStorage.setItem('user', JSON.stringify(session.user));
+
+                    // 触发登录事件
+                    window.dispatchEvent(new CustomEvent('userLoggedIn', {
+                        detail: { user: session.user }
+                    }));
+
+                    // 跳转到游戏页面
+                    setTimeout(() => {
+                        window.location.href = 'game.html';
+                    }, 1500);
+                } else {
+                    showMessage('✅ 邮箱验证成功！请使用您的邮箱和密码登录', false);
+                    // 自动填充邮箱（从URL中获取）
+                    const emailParam = urlParams.get('email');
+                    if (emailParam) {
+                        emailInput.value = emailParam;
+                    }
+                }
+
+                // 清除URL参数
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+
         // DOM元素
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const usernameInput = document.getElementById('username');
         const usernameGroup = document.getElementById('usernameGroup');
-        const verifyCodeGroup = document.getElementById('verifyCodeGroup');
-        const verifyCodeInput = document.getElementById('verifyCode');
-        const sendCodeBtn = document.getElementById('sendCodeBtn');
         const loginBtn = document.getElementById('loginBtn');
         const toggleFormBtn = document.getElementById('toggleFormBtn');
-        const guestBtn = document.getElementById('guestBtn');
         const messageDiv = document.getElementById('message');
 
         // 表单状态：true表示登录表单，false表示注册表单
         let isLoginForm = true;
-        let verificationCode = null;
-        let countdownTimer = null;
         
         // 显示消息
         function showMessage(message, isError = false) {
@@ -711,6 +780,51 @@
             }, 5000);
         }
         
+        // 重发验证邮件功能
+        async function resendVerificationEmail() {
+            const email = emailInput.value.trim();
+
+            if (!email) {
+                showMessage('请输入您的邮箱地址', true);
+                return;
+            }
+
+            // 添加加载状态
+            const resendBtn = document.getElementById('resendVerifyBtn');
+            if (resendBtn) {
+                resendBtn.disabled = true;
+                const originalText = resendBtn.textContent;
+                resendBtn.innerHTML = '<span class="loading-spinner"></span>发送中...';
+            }
+
+            try {
+                const result = await window.userDataManager.resendVerificationEmail(email);
+
+                if (result.success) {
+                    showMessage('📧 验证邮件已重新发送！请查收您的邮箱（注意查看垃圾邮件文件夹）', false);
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('重发验证邮件失败:', error);
+                let errorMessage = error.message || '发送失败，请稍后重试';
+
+                if (errorMessage.includes('rate limit') || errorMessage.includes('too many requests')) {
+                    errorMessage = '发送过于频繁，请等待60秒后再试';
+                } else if (errorMessage.includes('not found') || errorMessage.includes('User not found')) {
+                    errorMessage = '未找到该邮箱的注册信息，请先注册';
+                }
+
+                showMessage(`❌ ${errorMessage}`, true);
+            } finally {
+                // 恢复按钮状态
+                if (resendBtn) {
+                    resendBtn.disabled = false;
+                    resendBtn.textContent = '📧 重发验证邮件';
+                }
+            }
+        }
+
         // 切换表单
         function toggleForm() {
             isLoginForm = !isLoginForm;
@@ -719,29 +833,21 @@
                 loginBtn.textContent = '登录';
                 toggleFormBtn.textContent = '注册';
                 usernameGroup.style.display = 'none';
-                verifyCodeGroup.style.display = 'none';
+                // 隐藏重发验证按钮
+                if (document.getElementById('resendVerifyBtn')) {
+                    document.getElementById('resendVerifyBtn').remove();
+                }
             } else {
                 loginBtn.textContent = '注册';
                 toggleFormBtn.textContent = '登录';
                 usernameGroup.style.display = 'block';
-                verifyCodeGroup.style.display = 'block';
             }
 
             // 清空输入
             emailInput.value = '';
             passwordInput.value = '';
             usernameInput.value = '';
-            verifyCodeInput.value = '';
-            verificationCode = null;
             messageDiv.style.display = 'none';
-
-            // 清除倒计时
-            if (countdownTimer) {
-                clearInterval(countdownTimer);
-                countdownTimer = null;
-                sendCodeBtn.disabled = false;
-                sendCodeBtn.textContent = '发送验证码';
-            }
         }
         
         // 登录功能
@@ -755,19 +861,37 @@
             }
 
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                const { data, error } = await window.supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
 
                 if (error) {
+                    // 处理未验证邮箱的情况
+                    if (error.message.includes('email not confirmed') || error.message.includes('unconfirmed')) {
+                        showMessage('邮箱尚未验证！请查收邮件并点击链接验证，或点击下方按钮重发验证邮件', true);
+                        
+                        // 显示重发验证按钮
+                        if (!document.getElementById('resendVerifyBtn')) {
+                            const resendBtn = document.createElement('button');
+                            resendBtn.id = 'resendVerifyBtn';
+                            resendBtn.className = 'btn btn-secondary';
+                            resendBtn.textContent = '重发验证邮件';
+                            resendBtn.style.marginTop = '1rem';
+                            resendBtn.style.marginRight = '0.5rem';
+                            resendBtn.addEventListener('click', resendVerificationEmail);
+                            
+                            // 添加到表单中
+                            const loginForm = document.getElementById('loginForm');
+                            loginForm.appendChild(resendBtn);
+                        }
+                        return;
+                    }
                     throw error;
                 }
 
                 // 登录成功，保存用户信息到localStorage
                 localStorage.setItem('user', JSON.stringify(data.user));
-                // 清除游客模式标记，确保使用登录账号
-                localStorage.removeItem('guestMode');
                 showMessage('登录成功！');
 
                 // 触发自定义事件，开始游戏时长追踪
@@ -785,70 +909,13 @@
             }
         }
         
-        // 发送验证码
-        async function sendVerificationCode() {
-            const email = emailInput.value.trim();
-
-            if (!email) {
-                showMessage('请先输入邮箱', true);
-                return;
-            }
-
-            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                showMessage('请输入有效的邮箱地址', true);
-                return;
-            }
-
-            try {
-                sendCodeBtn.disabled = true;
-                sendCodeBtn.textContent = '发送中...';
-
-                // 调用后端API发送验证码
-                const response = await fetch('http://localhost:5000/api/send-verification-email', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showMessage(result.message, false);
-                    console.log(`验证码已发送到 ${email}`);
-
-                    // 开始60秒倒计时
-                    let countdown = 60;
-                    countdownTimer = setInterval(() => {
-                        countdown--;
-                        sendCodeBtn.textContent = `${countdown}秒后重发`;
-
-                        if (countdown <= 0) {
-                            clearInterval(countdownTimer);
-                            countdownTimer = null;
-                            sendCodeBtn.disabled = false;
-                            sendCodeBtn.textContent = '发送验证码';
-                            verificationCode = null;
-                        }
-                    }, 1000);
-                } else {
-                    throw new Error(result.error || '发送失败');
-                }
-            } catch (error) {
-                showMessage(`发送验证码失败: ${error.message}`, true);
-                sendCodeBtn.disabled = false;
-                sendCodeBtn.textContent = '发送验证码';
-            }
-        }
-
         // 注册功能
         async function signUp() {
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             const username = usernameInput.value.trim();
-            const code = verifyCodeInput.value.trim();
 
+            // 基础验证
             if (!email || !password || !username) {
                 showMessage('请填写所有字段', true);
                 return;
@@ -864,81 +931,152 @@
                 return;
             }
 
-            if (!code || code.length !== 6) {
-                showMessage('请输入6位验证码', true);
+            if (username.length < 2) {
+                showMessage('用户名至少需要2个字符', true);
                 return;
             }
 
+            // 禁用按钮，显示加载状态
+            setButtonsLoading(true);
+
             try {
-                // 先验证验证码
-                const verifyResponse = await fetch('http://localhost:5000/api/verify-code', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, code })
-                });
+                // 使用 userDataManager 进行注册
+                const result = await window.userDataManager.signUp(email, password, username);
 
-                const verifyResult = await verifyResponse.json();
-
-                if (!verifyResult.success) {
-                    throw new Error(verifyResult.error || '验证码验证失败');
+                if (!result.success) {
+                    throw new Error(result.error);
                 }
 
-                // 验证码正确，进行注册
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        data: {
-                            username: username
-                        },
-                        emailRedirectTo: window.location.origin + '/pages/game.html'
+                // 注册成功
+                if (result.needsVerification) {
+                    showMessage('🎉 注册成功！请查收邮件并点击链接验证邮箱', false);
+                    document.getElementById('passwordStrength').style.display = 'none';
+
+                    // 显示重发验证按钮
+                    if (!document.getElementById('resendVerifyBtn')) {
+                        const resendBtn = document.createElement('button');
+                        resendBtn.id = 'resendVerifyBtn';
+                        resendBtn.className = 'btn btn-secondary';
+                        resendBtn.innerHTML = '📧 重发验证邮件';
+                        resendBtn.style.marginTop = '1rem';
+                        resendBtn.style.marginRight = '0.5rem';
+                        resendBtn.addEventListener('click', resendVerificationEmail);
+
+                        const loginForm = document.getElementById('loginForm');
+                        loginForm.appendChild(resendBtn);
                     }
-                });
 
-                if (error) {
-                    throw error;
+                    // 清空表单，保持在注册状态
+                    emailInput.value = '';
+                    passwordInput.value = '';
+                    usernameInput.value = '';
+
+                } else if (result.session) {
+                    showMessage('🎉 注册成功！正在跳转游戏...', false);
+                    document.getElementById('passwordStrength').style.display = 'none';
+
+                    setTimeout(() => {
+                        window.location.href = 'game.html';
+                    }, 1500);
                 }
-
-                showMessage('注册成功！正在跳转...', false);
-
-                // 清除倒计时
-                if (countdownTimer) {
-                    clearInterval(countdownTimer);
-                    countdownTimer = null;
-                }
-
-                // 注册成功后跳转到游戏页面
-                setTimeout(() => {
-                    window.location.href = 'game.html';
-                }, 2000);
 
             } catch (error) {
-                showMessage(`注册失败: ${error.message}`, true);
+                console.error('注册错误:', error);
+                let errorMessage = error.message || '注册失败，请重试';
+
+                // 友好错误提示
+                if (errorMessage.includes('用户名已被使用')) {
+                    errorMessage = '该用户名已被使用，请选择其他用户名';
+                } else if (errorMessage.includes('已被注册')) {
+                    errorMessage = '该邮箱已被注册，请直接登录';
+                } else if (errorMessage.includes('网络')) {
+                    errorMessage = '网络连接失败，请检查网络后重试';
+                }
+
+                showMessage(`❌ ${errorMessage}`, true);
+            } finally {
+                setButtonsLoading(false);
             }
         }
-        
-        // 游客模式（暂时关闭）
-        function guestMode() {
-            // 暂时禁用游客模式，强制要求登录
-            showMessage('游客模式暂时关闭，请先登录', true);
-            return;
-            
-            // 以下代码暂时不执行
-            // 保存游客模式标记
-            // localStorage.setItem('guestMode', 'true');
-            // showMessage('以游客模式进入游戏');
-            // 
-            // // 跳转到游戏页面
-            // setTimeout(() => {
-            //     window.location.href = 'game.html';
-            // }, 1000);
+
+        // 设置按钮加载状态
+        function setButtonsLoading(loading) {
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => {
+                if (loading) {
+                    btn.disabled = true;
+                    if (btn.id !== 'toggleFormBtn') {
+                        if (!btn.querySelector('.loading-spinner')) {
+                            const spinner = document.createElement('span');
+                            spinner.className = 'loading-spinner';
+                            btn.insertBefore(spinner, btn.firstChild);
+                        }
+                    }
+                } else {
+                    btn.disabled = false;
+                    const spinner = btn.querySelector('.loading-spinner');
+                    if (spinner) {
+                        spinner.remove();
+                    }
+                }
+            });
         }
+
+        // 密码强度检测
+        function checkPasswordStrength(password) {
+            if (password.length === 0) {
+                return { strength: 'none', text: '' };
+            }
+
+            let score = 0;
+            let feedback = [];
+
+            // 长度检查
+            if (password.length >= 6) score += 1;
+            else feedback.push('至少6位字符');
+
+            if (password.length >= 10) score += 1;
+
+            // 复杂度检查
+            if (/[a-z]/.test(password)) score += 1;
+            if (/[A-Z]/.test(password)) score += 1;
+            if (/[0-9]/.test(password)) score += 1;
+            if (/[^a-zA-Z0-9]/.test(password)) score += 1;
+
+            if (score <= 2) {
+                return {
+                    strength: 'weak',
+                    text: '🔒 密码强度：弱'
+                };
+            } else if (score <= 4) {
+                return {
+                    strength: 'medium',
+                    text: '🔐 密码强度：中等'
+                };
+            } else {
+                return {
+                    strength: 'strong',
+                    text: '🔑 密码强度：强'
+                };
+            }
+        }
+
+        // 密码输入监听
+        passwordInput.addEventListener('input', function() {
+            if (!isLoginForm && this.value.length > 0) {
+                const result = checkPasswordStrength(this.value);
+                const strengthDiv = document.getElementById('passwordStrength');
+
+                strengthDiv.textContent = result.text;
+                strengthDiv.className = 'password-strength ' + result.strength;
+                strengthDiv.style.display = 'block';
+            } else {
+                document.getElementById('passwordStrength').style.display = 'none';
+            }
+        });
         
         // 事件监听
         toggleFormBtn.addEventListener('click', toggleForm);
-        sendCodeBtn.addEventListener('click', sendVerificationCode);
         loginBtn.addEventListener('click', () => {
             if (isLoginForm) {
                 signIn();
@@ -946,8 +1084,7 @@
                 signUp();
             }
         });
-        guestBtn.addEventListener('click', guestMode);
-        
+
         // 按Enter键提交
         document.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {

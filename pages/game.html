@@ -28,6 +28,7 @@
         <script src="../scripts/game-integration.js"></script>
     </head>
     <body>
+        <div class="game-container">
         <div class = "map">
             <div id="artBox">
                 <div id="leftHouse"></div>
@@ -311,7 +312,6 @@
                 </div>
                 <div class="main-menu-body">
                     <button class="main-menu-button primary" id="mapSelectionBtn">选择地图</button>
-                    <button class="main-menu-button secondary" id="fullscreenBtn">全屏模式</button>
                     <button class="main-menu-button secondary" id="leaderboardBtn">排行榜</button>
                     <button class="main-menu-button secondary" id="userInfoBtn">个人信息</button>
                     <button class="main-menu-button secondary" id="helpBtnFromMain">游戏帮助</button>
@@ -476,33 +476,6 @@
             }
 
 
-            // 全屏功能实现
-            function toggleFullscreen() {
-                if (!document.fullscreenElement) {
-                    // 进入全屏
-                    document.documentElement.requestFullscreen().catch(err => {
-                        console.error(`无法进入全屏模式: ${err.message}`);
-                    });
-                } else {
-                    // 退出全屏
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    }
-                }
-            }
-
-            // 更新全屏按钮文本
-            function updateFullscreenButton() {
-                const fullscreenBtn = document.getElementById('fullscreenBtn');
-                if (fullscreenBtn) {
-                    if (document.fullscreenElement) {
-                        fullscreenBtn.textContent = '退出全屏';
-                    } else {
-                        fullscreenBtn.textContent = '全屏模式';
-                    }
-                }
-            }
-
             document.addEventListener('DOMContentLoaded', function() {
                 // 返回按钮 - 统一返回到游戏主菜单
                 const backBtn = document.getElementById('backButton');
@@ -514,21 +487,6 @@
                 } else {
                     console.error('返回按钮元素未找到');
                 }
-
-                // 全屏按钮事件监听器
-                const fullscreenBtn = document.getElementById('fullscreenBtn');
-                if (fullscreenBtn) {
-                    fullscreenBtn.addEventListener('click', toggleFullscreen);
-                }
-
-                // 监听全屏变化事件
-                document.addEventListener('fullscreenchange', function() {
-                    updateFullscreenButton();
-                    // 触发resizeGame函数，确保游戏在全屏切换时正确缩放
-                    if (typeof window.resizeGame === 'function') {
-                        window.resizeGame();
-                    }
-                });
 
                 // 音量控制功能（简化版，主要控制由control.js处理）
                 const volumeIcon = document.getElementById('volumeIcon');
@@ -566,16 +524,8 @@
                     updateVolumeDisplay();
                 });
             });
-
-            // 添加F11快捷键支持全屏切换
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'F11') {
-                    e.preventDefault();
-                    toggleFullscreen();
-                }
-            });
         </script>
         <script src ="../scripts/control.js"></script>
-
+        </div>
     </body>
 </html>
